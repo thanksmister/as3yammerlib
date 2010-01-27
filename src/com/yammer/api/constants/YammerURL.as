@@ -14,7 +14,7 @@ package com.yammer.api.constants
 		 
 		 
 		 public function YammerURL() {
-			 throw Error("The YammerSettings class cannot be instantiated.");
+			 throw Error("The YammerURL class cannot be instantiated.");
 		 }
 
 	}

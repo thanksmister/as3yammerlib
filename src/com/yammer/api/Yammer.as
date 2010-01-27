@@ -280,16 +280,6 @@ package com.yammer.api
 		 * @private
 		 */
 		protected var consumerSecret:String;
-	
-		/**
-		 * @private
-		 */
-		protected var oauthRequestToken:String;
-		
-		/**
-		 * @private
-		 */
-		protected var oauthRequestSecret:String;
 		
 		/**
 		 * @private
@@ -497,6 +487,7 @@ package com.yammer.api
 				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
 				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
 				urlLoader.load(urlRequest);
+				trace(urlRequest.url);
 		}
 		
 		/**
@@ -507,10 +498,10 @@ package com.yammer.api
 		{
 			var urlvars:URLVariables = new URLVariables(String(event.target.data));
 			
-			this.oauthRequestToken = urlvars.oauth_token;
-			this.oauthRequestSecret = urlvars.oauth_token_secret;
+			this.oauthToken = urlvars.oauth_token;
+			this.oauthTokenSecret = urlvars.oauth_token_secret;
 			
-			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_TOKEN, {'oauth_token':oauthRequestToken, 'oauth_token_secret':oauthRequestSecret}));
+			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_TOKEN, {'oauth_token':oauthToken, 'oauth_token_secret':oauthTokenSecret}));
 		}
 		
 		/**
@@ -520,7 +511,7 @@ package com.yammer.api
         public function sendAuthorizationRequest():void 
         {
 			var urlRequest : URLRequest = new URLRequest ();
-				urlRequest.url = YammerPaths.OAUTH_AUTHORIZE + "?oauth_token=" + this.oauthRequestToken;
+				urlRequest.url = YammerPaths.OAUTH_AUTHORIZE + "?oauth_token=" + this.oauthToken;
 				
 			navigateToURL(urlRequest, "_blank");  
 		}
@@ -529,22 +520,23 @@ package com.yammer.api
 		 * If you want to optionally get the path to open your own browser window for getting the verify pin
 		 * you can pass in the returned token fro the requestToken method and get the complete path.
 		 * 
+		 * @param oauth_token The token returned from requestToken() call
 		 * @return String value for the authorization url to launch in external browser window
 		 * */
-		public function getAuthorizationRequestPath():String 
+		public function getAuthorizationRequestPath(oauth_token:String):String 
 		{
-			return YammerPaths.OAUTH_AUTHORIZE + "?oauth_token=" + this.oauthRequestToken; 
+			return YammerPaths.OAUTH_AUTHORIZE + "?oauth_token=" + oauth_token; 
 		}
 		
 		/**
 		 * Getting the Oauth Verify pin is retrieved by sending users to the Yammer web site for authorization. After authorizing 
 		 * the appliation, user will need to copy the pin into your application.
 		 * 
-		 * @param oauth_verify The Oauth verification pin
+		 * @param verify_pin The Oauth verification pin
 		 * */
-		public function accessToken( oauthVerifier:String ):void 
+		public function accessToken( verify_pin:String ):void 
 		{
-			this.oauthVerifier = oauthVerifier;
+			this.oauthVerifier = verify_pin;
 	
 			var urlRequest:URLRequest = createRequest(YammerPaths.OAUTH_ACCESS_TOKEN);
 			var urlLoader:URLLoader = new URLLoader();
@@ -1486,7 +1478,10 @@ package com.yammer.api
 				
 				if(obj.response) {
 					error.errorCode = obj.response.code;
-					error.errorMessage = obj.response.message;			
+					error.errorMessage = obj.response.message;	
+				} else if(obj.hash) {
+					error.errorCode = obj.hash.response.code;
+					error.errorMessage = obj.hash.response.message;
 				} else {
 					error.errorCode = YammerError.STREAM_ERROR;
 					error.errorMessage = obj.error;
@@ -1560,8 +1555,13 @@ package com.yammer.api
 				if (paramStr) { urlRequest.data = paramStr; } 
 			}
 			
-			// set the headers and dump the cookies
-			urlRequest.requestHeaders = new Array( new URLRequestHeader("Authorization", createOauthHeader()), new URLRequestHeader("Cookie", "")  );	
+			// set the headers and dump the cookies (AIR only) 
+			if(this.airClient) {
+				urlRequest.requestHeaders = new Array( new URLRequestHeader("Authorization", createOauthHeader()), new URLRequestHeader("Cookie", "")  );	
+			} else {
+				urlRequest.requestHeaders = new Array( new URLRequestHeader("Authorization", createOauthHeader()) );	
+			}
+			
 			
 			// remove oauth_verify after used for authentication
 			if(this.oauthVerifier) {
