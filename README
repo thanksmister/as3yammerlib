@@ -1,5 +1,7 @@
 AS3 Yammer Library
 
-This is a AS3 library wrapper for the Yammer API.  The library is currently only working for AIR applications.  Working on a fix, stay tuned!
+This is a AS3 library wrapper for the Yammer API. 
+
+Example: http://thanksmister.com/index.php/archive/as3-yammer-library/
 
 MIT License: http://www.opensource.org/licenses/mit-license.php
