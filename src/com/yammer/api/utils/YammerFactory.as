@@ -146,7 +146,6 @@ package com.yammer.api.utils
 				tab.group_id = obj.group_id;
 				tab.is_private = (obj.private == "true");
 				tab.feed_description = obj.feed_description;
-				trace(obj.feed_description);
 				obj = null;
 			} catch (error:Error){
 				throw new Error("Exception parsing tab: " + "\nError: " + error.message);

@@ -485,9 +485,9 @@ package com.yammer.api
 			var urlLoader:URLLoader = new URLLoader();
 				urlLoader.addEventListener(Event.COMPLETE, onRequestToken);
 				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
-				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOErrorXML);
 				urlLoader.load(urlRequest);
-				trace(urlRequest.url);
+				//trace(urlRequest.url);
 		}
 		
 		/**
@@ -541,6 +541,8 @@ package com.yammer.api
 			var urlRequest:URLRequest = createRequest(YammerPaths.OAUTH_ACCESS_TOKEN);
 			var urlLoader:URLLoader = new URLLoader();
 				urlLoader.addEventListener(Event.COMPLETE, onAccessToken);
+				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOErrorXML);
 				urlLoader.load(urlRequest);
 		}
 		
@@ -657,12 +659,9 @@ package com.yammer.api
 		 * */
 		private function onCurrentUser(event:Event):void
 		{
-			try {
-				var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
-				var user:YammerUser = YammerFactory.user(obj);
-				dispatchEvent(new YammerEvent(YammerEvent.CURRENT_USER, {"user":user}));
-			} catch (e:Error) { trace(e.message); }
-			
+			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
+			var user:YammerUser = YammerFactory.user(obj);
+			dispatchEvent(new YammerEvent(YammerEvent.CURRENT_USER, {"user":user}));
 		}
 		
 		/**
@@ -829,11 +828,6 @@ package com.yammer.api
 		public function getUserMessages(id:String, newer_than:String = null, older_than:String = null, threaded:Boolean = false, update_last_seen_message_id:Boolean = false):void	
 		{	
 			var path:String = YammerPaths.MESSAGES + YammerPaths.MESSAGES_FROM_USER + id + YammerPaths.JSON; // json
-			
-			trace("Yammer:: getUserMessages: path: " + path);
-			
-			//https://www.yammer.com/api/v1/messages/from_user/196383.xml?update_last_seen_message_id=true
-			
 			var params:Object = new Object();
 			
 			if(older_than) params.older_than = older_than;
@@ -949,9 +943,6 @@ package com.yammer.api
 		public function postMessage(body:String, replied_to_id:String = null, group_id:String = null, direct_to_id:String = null, files:Array = null):void 
 		{
 			var path:String = YammerPaths.POST_MESSAGE;
-			
-			trace("YammerRequest :: postMessage: path: " + path);
-			
 			var params:Object = new Object();
 				params.body = body;
 				
@@ -1032,14 +1023,9 @@ package com.yammer.api
 		 * */
 		private function messageListHandler(event:Event):void
 		{
-			trace("Yammer:: message list result handler: " + event.target.data);
-			try{
-				var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
-				var messageList:YammerMessageList = YammerParser.parseMessages( obj );
-				dispatchEvent( new YammerEvent( YammerEvent.MESSAGES_REQUEST_RESULTS, {"messageList":messageList}) );
-			} catch (e:Error){
-				trace("JSON error: " + e.message);
-			}
+			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
+			var messageList:YammerMessageList = YammerParser.parseMessages( obj );
+			dispatchEvent( new YammerEvent( YammerEvent.MESSAGES_REQUEST_RESULTS, {"messageList":messageList}) );
 		}
 		
 		
@@ -1072,7 +1058,6 @@ package com.yammer.api
 		 * */
 		private function handleGetGroup(event:Event):void
 		{
-			trace(event.target.data);
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
 			var group:YammerGroup = YammerFactory.group( obj );
 			dispatchEvent( new YammerEvent( YammerEvent.GROUP_REQUEST_RESULTS, {"group":group}) );
@@ -1468,7 +1453,7 @@ package com.yammer.api
 		private function handleIOError(event:IOErrorEvent):void
 		{
 			var error:YammerError = new YammerError();
-			error.erroEvent = event;
+				error.erroEvent = event;
 			
 			trace("YammerRequest :: handleIOError: " + String(event.target.data));
 			trace("YammerRequest :: handleIOError: " + event.text);
@@ -1479,9 +1464,6 @@ package com.yammer.api
 				if(obj.response) {
 					error.errorCode = obj.response.code;
 					error.errorMessage = obj.response.message;	
-				} else if(obj.hash) {
-					error.errorCode = obj.hash.response.code;
-					error.errorMessage = obj.hash.response.message;
 				} else {
 					error.errorCode = YammerError.STREAM_ERROR;
 					error.errorMessage = obj.error;
@@ -1501,7 +1483,7 @@ package com.yammer.api
 		 * */
 		private function handleHTTPStatus(event:HTTPStatusEvent):void
 		{
-			trace("YammerRequest :: handleHTTPStatus: " + event.status);
+			//trace("YammerRequest :: handleHTTPStatus: " + event.status);
 			
 			var error:YammerError = new YammerError();
 			if(event.status == 503 || event.status == 0) {
@@ -1516,6 +1498,44 @@ package com.yammer.api
 				dispatchEvent(new YammerEvent(YammerEvent.HTTP_STATUS, {"status": event.status}));
 			}
 			
+		}
+		/**
+		 * If we get an error when calling a non-api method (like oauth), the Yammer service
+		 * only returns XML, no JSON option. Here is an example response:
+		 * 
+		 * <hash>
+		 * 	<response>
+		 * 		<code>22</code>
+		 * 		<message>Unsupported signature method.</message>
+		 * 		<stat>fail</stat>
+		 * 	</response>
+		 * </hash>
+		 * */
+		private function handleIOErrorXML(event:IOErrorEvent):void
+		{
+			var error:YammerError = new YammerError();
+			error.erroEvent = event;
+			
+			trace("YammerRequest :: handleIOError: " + String(event.target.data));
+			trace("YammerRequest :: handleIOError: " + event.text);
+			
+			try{
+				var xml:XML = XML(xml['response']);
+				
+				if(xml){
+					error.errorMessage = xml['response']['message'];
+					error.errorCode = xml['response']['code'];	
+				} else {
+					error.errorCode = YammerError.UNKNOWN_ERROR;
+					error.errorMessage = event.text;
+				}
+			} catch (e:Error) {
+				trace("YammerRequest :: handleIOError: " + e.message);
+				error.errorCode = YammerError.UNKNOWN_ERROR;
+				error.errorMessage = event.text + " You may want to check the http status event.";
+			}
+			
+			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_FAIL, null, null, error));
 		}
 	
 	
@@ -1619,10 +1639,11 @@ package com.yammer.api
 		    }
 		
 		    header += ("\", oauth_version=\"1.0\"");
-		
+			
+			trace ("Header: " + header);
+			
 		    return header;
 		}
-
 
 		/**
 		 * URLEncode the parameters for the URLRequest data.

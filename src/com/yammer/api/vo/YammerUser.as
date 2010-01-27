@@ -54,6 +54,8 @@ package com.yammer.api.vo
 		public function YammerUser()
 		{
 		}
+		
+	
 
 		/** 
 		 * User mug shot url.
