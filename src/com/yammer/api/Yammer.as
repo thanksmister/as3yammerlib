@@ -483,7 +483,7 @@ package com.yammer.api
 		{	
 			var params:Object = new Object();
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 				
 			var urlRequest:URLRequest = createRequest(YammerPaths.OAUTH_REQUEST_TOKEN, params);
 			
@@ -544,7 +544,7 @@ package com.yammer.api
 			this.oauthVerifier = verify_pin;
 			var params:Object = new Object();
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 	
 			var urlRequest:URLRequest = createRequest(YammerPaths.OAUTH_ACCESS_TOKEN, params);
 			var urlLoader:URLLoader = new URLLoader();
@@ -714,7 +714,7 @@ package com.yammer.api
 				params.target_type = YammerTypes.USER_TYPE;
 				params.target_id = target_id;
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 				
 			var urlRequest : URLRequest = createRequest(path, params, URLRequestMethod.POST);
 			var urlLoader:URLLoader = new URLLoader();
@@ -735,7 +735,7 @@ package com.yammer.api
 				params.target_type = YammerTypes.USER_TYPE; // double check this might not have first letter capitalized
 				params.target_id = target_id;
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, "DELETE"); // URLRequestMethod.DELETE only in AIR
 			var urlLoader:URLLoader = new URLLoader();
@@ -752,7 +752,7 @@ package com.yammer.api
 		public function isFollowingUser(user_id:Number):void 
 		{	
 			var params:Object = new Object();
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var path:String = YammerPaths.SUBSCRIPTIONS +  YammerPaths.TO_USER + user_id + ".json";
 			var urlRequest : URLRequest = createRequest(path, params, URLRequestMethod.POST);
@@ -1085,7 +1085,7 @@ package com.yammer.api
 			var params:Object = new Object();
 				params.group_id = group_id;
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, URLRequestMethod.POST);
 			var urlLoader:URLLoader = new URLLoader();
@@ -1105,7 +1105,7 @@ package com.yammer.api
 			var params:Object = new Object();
 				params.group_id = group_id;
 				
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, "DELETE");
 			var urlLoader:URLLoader = new URLLoader();
@@ -1161,7 +1161,7 @@ package com.yammer.api
 				params.target_type = YammerTypes.TAG_TYPE;
 				params.target_id = target_id;
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, URLRequestMethod.POST);
 			var urlLoader:URLLoader = new URLLoader();
@@ -1182,7 +1182,7 @@ package com.yammer.api
 				params.target_type = YammerTypes.TAG_TYPE;
 				params.target_id = target_id;
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, "DELETE"); // URLRequestMethod.DELETE only in AIR
 			var urlLoader:URLLoader = new URLLoader();
@@ -1203,7 +1203,7 @@ package com.yammer.api
 			var path:String = YammerPaths.SUBSCRIPTIONS + "to_tag/" + tag_id + ".json";
 			var params:Object = new Object();
 
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, URLRequestMethod.POST);
 			var urlLoader:URLLoader = new URLLoader();
@@ -1259,7 +1259,7 @@ package com.yammer.api
 				params.target_type = YammerTypes.BOT_TYPE;
 				params.target_id = target_id;
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, URLRequestMethod.POST);
 			var urlLoader:URLLoader = new URLLoader();
@@ -1280,7 +1280,7 @@ package com.yammer.api
 				params.target_type = YammerTypes.BOT_TYPE; // double check this might not have first letter capitalized
 				params.target_id = target_id;
 			
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 			
 			var urlRequest : URLRequest = createRequest(path, params, "DELETE"); // URLRequestMethod.DELETE only in AIR
 			var urlLoader:URLLoader = new URLLoader();
@@ -1331,7 +1331,7 @@ package com.yammer.api
 			var params:Object = new Object();
 				params.id = id;	   
 				
-			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled by Flex
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 				
 			var urlRequest : URLRequest = createRequest(path, params, "DELETE");
 			var urlLoader:URLLoader = new URLLoader();
