@@ -44,7 +44,7 @@ package com.yammer.api
 		public static const UPLOAD_FILE_ERROR:int = 3302;	
 		
 		/** Error occurred because of API Rate limiting */
-		public static const API_RATE_LIMIT_ERROR:int = 403;	
+		public static const FORBIDDEN_STATUS:int = 403;	
 		
 		/** Unknown consumer key. */
 		public static const UNKNOWN_CONSUMER_KEY:int = 15;
@@ -91,6 +91,7 @@ package com.yammer.api
 	
 		private var _errorCode:int;
 		private var _errorMessage:String;
+		private var _errorDetail:String;
 		private var _errorEvent:Object;
 		
 		public function YammerError() 
@@ -105,7 +106,7 @@ package com.yammer.api
 		 **/
 		public static function getErrorMessage(errorCode : Number) : String
 		{
-			trace("YammerError :: getErrorMessage error code: " + errorCode);
+			//trace("YammerError :: getErrorMessage error code: " + errorCode);
 			
 			switch (errorCode)
 			{
@@ -130,7 +131,7 @@ package com.yammer.api
 					return "No netowrk connection to service."
 					
 				case YammerError.UNAUTHORIZED_STATUS:
-					return "Unauthorized access token or secret"
+					return "Unauthorized. Invalid credentials."
 		
 				case YammerError.UPLOAD_FILE_ERROR:
 					return "Unable to upload your file. Please try again later.";
@@ -144,8 +145,8 @@ package com.yammer.api
 				case YammerError.INVALID_OAUTH_SIGNATUE:
 				case YammerError.UNSUPPORTED_SIGNATURE_METHOD:	
 					return "The oauth request signature was not formed correctly."
-				case YammerError.API_RATE_LIMIT_ERROR:
-					return "The API rate limit has been exceeded."
+				case YammerError.FORBIDDEN_STATUS:
+					return "Forbidden.  Access to service denied."
 				case YammerError.STREAM_ERROR:	
 					return "The requested service is unreachable or there was an error with the request."
 			}				
@@ -171,6 +172,16 @@ package com.yammer.api
 		public function set errorMessage( value:String ):void 
 		{
 			_errorMessage = value;	
+		}
+		
+		public function get errorDetail():String 
+		{
+			return _errorDetail;	
+		}
+		
+		public function set errorDetail( value:String ):void 
+		{
+			_errorDetail = value;	
 		}
 		
 		public function get erroEvent():Object 

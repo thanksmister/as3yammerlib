@@ -29,6 +29,10 @@ package com.yammer.api
 		private static function get OAUTH():String {
 			return BASE_URL + "oauth/";
 		}	 
+		
+		private static function get OAUTH_WRAP():String {
+			return BASE_URL + "oauth_wrap/";
+		}	 
 
 		public static function get OAUTH_REQUEST_TOKEN():String {
 			return OAUTH + "request_token";
@@ -40,6 +44,10 @@ package com.yammer.api
 
 		public static function get OAUTH_AUTHORIZE():String {
 			return OAUTH + "authorize";
+		}
+		
+		public static function get OAUTH_WRAP_ACCESS_TOKEN():String {
+			return OAUTH_WRAP + "access_token";
 		}
 		
 		public static function get NO_ACCESS():String {

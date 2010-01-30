@@ -451,27 +451,7 @@ package com.yammer.api
 			this.oauthToken = oauthToken;
 			this.oauthTokenSecret = oauthTokenSecret;
 		}
-		
-		/**
-		 * Gets the oauth token.
-		 * 
-		 * @return oauthToken
-		 */
-		public function getOuthToken():String
-		{
-			return this.oauthToken;
-		}
-		
-		/**
-		 * Gets the oauth token secret.
-		 * 
-		 * @return oauthTokenSecret 
-		 */
-		public function getOuthTokenSecret():String
-		{
-			return this.oauthTokenSecret;
-		}
-		
+	
 		/**
 		 * Request token from the service for your application with your consumer key and secret values. 
 		 * The request will return an oauth secret and key.
@@ -550,7 +530,7 @@ package com.yammer.api
 			var urlLoader:URLLoader = new URLLoader();
 				urlLoader.addEventListener(Event.COMPLETE, onAccessToken);
 				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
-				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOErrorXML);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
 				urlLoader.load(urlRequest);
 		}
 		
@@ -569,6 +549,48 @@ package com.yammer.api
 			dispatchEvent(new YammerEvent(YammerEvent.ACCESS_TOKEN, {'oauth_token':oauthToken, 'oauth_token_secret':oauthTokenSecret}));
 		}
 		
+		/**
+		 * For those clients that have special privileges, they can use the Yammer service WRAP controller 
+		 * to get the users access tokens simply by supplying the username and password for the user.  The 
+		 * call returns the oauth access token and secret needed for signing calls to the Yammer API. 
+		 * 
+		 * @param username Yammer username
+		 * @param password Yammer password;
+		 * */
+		public function accessWrapToken(username:String, password:String):void
+		{
+			var params:Object = new Object();
+				params.wrap_username = username;
+				params.wrap_password = password;
+				params.wrap_client_id = this.consumerKey;
+				
+			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
+			
+			var urlRequest:URLRequest = createRequest(YammerPaths.OAUTH_WRAP_ACCESS_TOKEN, params);
+			var urlLoader:URLLoader = new URLLoader();
+			urlLoader.addEventListener(Event.COMPLETE, onAccessWrapToken);
+			urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+			urlLoader.load(urlRequest);
+		}
+		
+		/**
+		 * Returns the oauth token and secret so the application may store these values the
+		 * next time the user logs into the application.
+		 * */
+		private function onAccessWrapToken(event:Event):void
+		{	
+			var urlvars:URLVariables = new URLVariables(String(event.target.data));
+			
+			this.oauthToken = urlvars.wrap_access_token;
+			this.oauthTokenSecret = urlvars.wrap_refresh_token;
+			
+			dispatchEvent(new YammerEvent(YammerEvent.ACCESS_TOKEN, {'oauth_token':oauthToken, 'oauth_token_secret':oauthTokenSecret}));
+		}
+		
+		//---------------------------------------------------------//
+		//-------------------  NETWORK METHODS---------------------/
+		//--------------------------------------------------------//
 		
 		/**
 		 * Retrieves a list of all networks and tokens for current user.
@@ -1479,8 +1501,8 @@ package com.yammer.api
 			var error:YammerError = new YammerError();
 				error.erroEvent = event;
 			
-			trace("YammerRequest :: handleIOError: " + String(event.target.data));
-			trace("YammerRequest :: handleIOError: " + event.text);
+			trace("Yammer :: handleIOError data: " + String(event.target.data));
+			trace("Yammer :: handleIOError text: " + event.text);
 			
 			try{
 				var obj:Object = JSON.decode(String(event.target.data)) as Object;
@@ -1489,13 +1511,15 @@ package com.yammer.api
 					error.errorCode = obj.response.code;
 					error.errorMessage = obj.response.message;	
 				} else {
-					error.errorCode = YammerError.STREAM_ERROR;
-					error.errorMessage = obj.error;
+					error.errorCode = YammerError.UNKNOWN_ERROR;
+					error.errorMessage = String(event.target.data) + " You may want to check the http status event.";
+					error.errorDetail = event.text;
 				}
 			} catch (e:Error) {
-				trace("YammerRequest :: handleIOError: " + e.message);
-				error.errorCode = YammerError.STREAM_ERROR;
-				error.errorMessage = event.text + " You may want to check the http status event.";
+				trace("Yammer :: handleIOError exception: " + e.message);
+				error.errorCode = YammerError.UNKNOWN_ERROR;
+				error.errorMessage = String(event.target.data) + " You may want to check the http status event.";
+				error.errorDetail = event.text;
 			}
 			
 			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_FAIL, null, null, error));
@@ -1523,6 +1547,8 @@ package com.yammer.api
 			}
 			
 		}
+		
+		
 		/**
 		 * If we get an error when calling a non-api method (like oauth), the Yammer service
 		 * only returns XML, no JSON option. Here is an example response:
