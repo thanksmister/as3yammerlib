@@ -10,7 +10,7 @@ package com.yammer.api.constants
 		/**
 		 *	The main domain URL for Yammer services.
 		 */
-		 public static var BASE_URL:String = "https://staging.yammer.com/";
+		 public static var BASE_URL:String = "https://www.yammer.com/";
 		 
 		 
 		 public function YammerURL() {
