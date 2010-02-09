@@ -5,6 +5,7 @@
  */
 package com.yammer.api.utils
 {
+	import com.yammer.api.vo.YammerCurrentUser;
 	import com.yammer.api.vo.YammerGroup;
 	import com.yammer.api.vo.YammerGroupRequest;
 	import com.yammer.api.vo.YammerMessage;
@@ -12,15 +13,14 @@ package com.yammer.api.utils
 	import com.yammer.api.vo.YammerNetwork;
 	import com.yammer.api.vo.YammerNetworkCurrent;
 	import com.yammer.api.vo.YammerSearch;
+	import com.yammer.api.vo.YammerSubscription;
 	import com.yammer.api.vo.YammerSuggestion;
 	import com.yammer.api.vo.YammerTag;
-	import com.yammer.api.vo.YammerTypes;
+	import com.yammer.api.constants.YammerTypes;
 	import com.yammer.api.vo.YammerUser;
 	
-	import flash.events.EventDispatcher;
-	import flash.utils.Dictionary;
 
-	public class YammerParser extends EventDispatcher	
+	public class YammerParser
 	{	
 		/**
 		 * YammerParser will parse JSON objects
@@ -74,52 +74,60 @@ package com.yammer.api.utils
 			
 			return networks;     
 		}     
+		
+		/**
+		 * Parse current networks JSON into a usable object. 
+		 * @param object JSON data
+		 * @return Array
+		 * */
+		public static  function parseCurrentUser(obj:Object):YammerCurrentUser 
+		{
+			var user:YammerCurrentUser = YammerUserFactory.createCurrentUser(obj);
+			
+			// group memberships and subscriptions
+			if(obj.group_memberships) user.group_memberships = parseGroups(obj.group_memberships as Array);
+			
+			return user;     
+		}  
+		
+		/**
+		 * Parse current networks JSON into a usable object. 
+		 * @param object JSON data
+		 * @return Array
+		 * */
+		public static  function parseUser(obj:Object):YammerUser 
+		{
+			var user:YammerUser = YammerUserFactory.createUser(obj);
+			return user;     
+		}  
 
 		/**
-		 * Parse message JSON into a usable object. 
+		 * Parse message list JSON into a usable object. 
 		 * @param object JSON data
 		 * @return YammerMessageList
 		 * */
 		public static function parseMessages(obj:Object):YammerMessageList 
 		{
-			var messageList:YammerMessageList = new YammerMessageList();
+			var messageList:YammerMessageList = YammerFactory.messageList(obj);
 			
-			try{
-				messageList.current_user_id = obj.meta.current_user_id;
-				
-				if(obj.mesta){
-					messageList.unseen_message_count_following = Number(obj.meta.unseen_message_count_following);
-					messageList.unseen_message_count_received = Number(obj.meta.unseen_message_count_received);
-					messageList.last_seen_message_id = obj.meta.last_seen_message_id;
-					messageList.requested_poll_interval = Number(obj.meta.requested_poll_interval);
-					messageList.older_available = (obj.meta.older_available == 'true') ? true : false;
-					messageList.show_billing_banner = (obj.meta.show_billing_banner == 'true') ? true : false;
-					
-					messageList.favorite_message_ids = obj.meta.favorite_message_ids as Array; // list of favorite
-					messageList.liked_message_ids = obj.meta.liked_message_ids as Array; // list of liked messages
-					messageList.followed_user_ids = obj.meta.followed_user_ids as Array;
-				}				
-				
-				if(obj.references) messageList.references = YammerMessageFactory.createReferences(obj.references as Array, messageList.followed_user_ids, messageList.liked_message_ids, messageList.favorite_message_ids);
-				if(obj.messages) messageList.messages = YammerMessageFactory.createMessages(obj.messages as Array, messageList.references, messageList.followed_user_ids, messageList.liked_message_ids, messageList.favorite_message_ids);
-
-			} catch (error:Error){
-				trace("Exception parsing message list: " + "\nError: " + error.message);
-			} 
+			if(obj.messages) cacheParsedMessages(obj.messages, messageList);
+			if(obj.references) cacheParsedObjects(obj.references, messageList);
 			
 			return messageList;
 		}
+		
 		
 		public static function parseSearch(obj:Object):YammerSearch
 		{
 			var searchResults:YammerSearch = new YammerSearch();
 			
 			var list:Array = [];
-	
+			
+			// TODO: parse search result objects into CacheManager
+			
 			if(Number(obj.count.messages) > 0){	
 				searchResults.count_messages = Number(obj.count.messages);
-				searchResults.references = parseReferencesSearch(obj);
-				searchResults.messages = parseMessageSearch(obj, searchResults.references);
+				searchResults.messages = parseMessageSearch(obj);
 			} 
 			
 			if(Number(obj.count.groups) > 0){
@@ -139,20 +147,15 @@ package com.yammer.api.utils
 			
 			return searchResults;
 		}
+	
 		
-		public static function parseReferencesSearch(obj:Object):Dictionary
-		{
-			var references:Dictionary = YammerMessageFactory.createReferences(obj.messages.references as Array);
-			return references;
-		}
-		
-		public static function parseMessageSearch(obj:Object, references:Dictionary):Array
+		public static function parseMessageSearch(obj:Object):Array
 		{
 			var list:Array = obj.messages.messages as Array;
 			var messages:Array = [];
 			for each (var msg:Object in list) {
-				var message:YammerMessage = YammerMessageFactory.createMessage(msg, references);
-				messages.push(message);
+				var message:YammerMessage = YammerMessageFactory.createMessage(msg);
+					messages.push(message);
 			}
 
 			return messages;
@@ -224,6 +227,11 @@ package com.yammer.api.utils
 
 			return list;     
 		}		
+		
+		public static function parseGroup(obj:Object):YammerGroup
+		{
+			return YammerFactory.group(obj);
+		}
 
 		public static  function parseGroups(groupList:Array):Array 
 		{
@@ -285,7 +293,7 @@ package com.yammer.api.utils
 		}
 		
 		/**
-		 * Parses the requests to joing groups into value objects.
+		 * Parses the requests to join groups into value objects.
 		 * @param obj JSON data
 		 * @return Array of <code>YammerRelationship</code> value objects
 		 * */
@@ -294,26 +302,64 @@ package com.yammer.api.utils
 			var list:Array = new Array();
 			
 			try{
-				var references:Dictionary =  YammerMessageFactory.createReferences(obj.references as Array);
+				
+				YammerParser.cacheParsedObjects(obj.references as Array);
 	
 				var group_requests:Array = obj.group_invitations; // request for you to join a group
 				var join_requests:Array = obj.group_requests as Array; // request to join your group
 		
 				for each (var group:Object in group_requests) {
-					var groupRequest:YammerGroupRequest = YammerFactory.groupRequests(group, references);
+					var groupRequest:YammerGroupRequest = YammerFactory.groupRequests(group);
 					list.push(groupRequest);
 				}
 	
 				for each (var join:Object in join_requests) {
-					var joinRequest:YammerGroupRequest = YammerFactory.joinRequests(join, references);
+					var joinRequest:YammerGroupRequest = YammerFactory.joinRequests(join);
 					list.push(joinRequest);
 				}
 			
 			} catch (error:Error){
-				trace("Exception parsing message list requests: " + "\nError: " + error.message);
+				trace("Error: Exception parsing message list requests: " + "\nError: " + error.message);
 			} 
 			
 			return list;   
+		}
+		
+		private static function cacheParsedMessages(list:Object, messageList:YammerMessageList = null):void
+		{	
+			var obj:Object;
+			
+			for each (obj in list) {
+				CacheManager.instance.addMessage(YammerMessageFactory.createMessage(obj, messageList));
+			}
+			
+			obj = null;
+			list = null;
+		}
+		
+		private static function cacheParsedObjects(list:Object, messageList:YammerMessageList = null):void
+		{	
+			var obj:Object;
+
+			for each (obj in list) {
+
+				if (obj.type == YammerTypes.MESSAGE_TYPE){
+					CacheManager.instance.addMessage(YammerMessageFactory.createMessage(obj, messageList));
+				} else if(obj.type == YammerTypes.USER_TYPE){
+					CacheManager.instance.addUser(YammerUserFactory.createUser(obj));	
+				} else if (obj.type == YammerTypes.BOT_TYPE){
+					CacheManager.instance.addBot(YammerUserFactory.createUser(obj))
+				} else if (obj.type == YammerTypes.GROUP_TYPE){
+					CacheManager.instance.addGroup(YammerFactory.group(obj))
+				} else if (obj.type == YammerTypes.THREAD_TYPE){
+					CacheManager.instance.addThread(YammerFactory.thread(obj));
+				} else if (obj.type == YammerTypes.TAG_TYPE){
+					CacheManager.instance.addTag(YammerFactory.tag(obj));
+				} 
+			}
+			
+			obj = null;
+			list = null;
 		}
 	}
 }

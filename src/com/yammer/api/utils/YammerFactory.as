@@ -6,17 +6,18 @@
 package com.yammer.api.utils
 {
 	import com.yammer.api.vo.YammerAttachment;
-	import com.yammer.api.vo.YammerAttachmentTypes;
+	import com.yammer.api.constants.YammerAttachmentTypes;
 	import com.yammer.api.vo.YammerGroup;
 	import com.yammer.api.vo.YammerGroupRequest;
-	import com.yammer.api.vo.YammerGroupTypes;
+	import com.yammer.api.constants.YammerGroupTypes;
+	import com.yammer.api.vo.YammerMessageList;
 	import com.yammer.api.vo.YammerNetwork;
 	import com.yammer.api.vo.YammerNetworkCurrent;
 	import com.yammer.api.vo.YammerSubscription;
 	import com.yammer.api.vo.YammerTab;
 	import com.yammer.api.vo.YammerTag;
 	import com.yammer.api.vo.YammerThread;
-	import com.yammer.api.vo.YammerTypes;
+	import com.yammer.api.constants.YammerTypes;
 	import com.yammer.api.vo.YammerUser;
 	
 	import flash.utils.Dictionary;
@@ -64,6 +65,44 @@ package com.yammer.api.utils
 		}
 		
 		
+		/**
+		 * Great <code>YammerMessageList</code>.
+		 * 
+		 * @public obj JSON object
+		 * @return <code>YammerMessageList</code>
+		 * */
+		public static function messageList(obj:Object):YammerMessageList 
+		{
+			var messageList:YammerMessageList = new YammerMessageList();
+			
+			try{
+				messageList.current_user_id = obj.meta.current_user_id;
+				
+				if(obj.meta){
+					messageList.unseen_message_count_following = Number(obj.meta.unseen_message_count_following);
+					messageList.unseen_message_count_received = Number(obj.meta.unseen_message_count_received);
+					messageList.last_seen_message_id = obj.meta.last_seen_message_id;
+					messageList.requested_poll_interval = Number(obj.meta.requested_poll_interval);
+					messageList.older_available = (obj.meta.older_available == 'true') ? true : false;
+					messageList.show_billing_banner = (obj.meta.show_billing_banner == 'true') ? true : false;
+					messageList.favorite_message_ids = obj.meta.favorite_message_ids as Array; // list of favorite
+					messageList.liked_message_ids = obj.meta.liked_message_ids as Array; // list of liked messages
+					messageList.followed_user_ids = obj.meta.followed_user_ids as Array;
+				}				
+				
+				if(obj.messages) {
+					var msgs:Array = new Array();
+					for each (var msg:Object in obj.messages){
+						msgs.push(msg.id);
+					}
+					messageList.messages = msgs;
+				}	
+			} catch (error:Error){
+				throw new Error("Exception parsing messagelist: " + "\nError: " + error.message);
+			} 
+			return messageList;
+		}
+		
 		public static function user(obj:Object):YammerUser 
 		{
 			var user:YammerUser = YammerUserFactory.createUser(obj);
@@ -90,7 +129,6 @@ package com.yammer.api.utils
 				group.description = obj.description;
 				group.privacy = obj.privacy;
 				
-				group.is_private = (group.privacy == YammerGroupTypes.PRIVACY_PRIVATE) ? true : false; 
 				if(obj.stats) {
 					group.members = obj.stats.members;
 					group.updates = obj.stats.updates;
@@ -147,7 +185,11 @@ package com.yammer.api.utils
 				tab.is_private = (obj.private == "true");
 				tab.feed_description = obj.feed_description;
 				obj = null;
-			} catch (error:Error){
+			}
+
+
+
+ catch (error:Error){
 				throw new Error("Exception parsing tab: " + "\nError: " + error.message);
 			}
 			return tab;
@@ -202,7 +244,7 @@ package com.yammer.api.utils
 			return attachment;
 		}
 		
-		public static function groupRequests(obj:Object, references:Dictionary):YammerGroupRequest 
+		public static function groupRequests(obj:Object):YammerGroupRequest 
 		{
 			var request:YammerGroupRequest = new YammerGroupRequest();
 			try{
@@ -210,15 +252,8 @@ package com.yammer.api.utils
 				request.url = obj.url;
 				request.web_url = obj.web_url;
 				request.created = new Date(String(obj.created_at));
-				request.group = references[YammerTypes.GROUP_TYPE][String(obj.group_id)];
-			
-				var inviters:Array = obj.inviter_ids as Array;
-				for each (var invitor:Object in inviters) {
-					request.user = references[YammerTypes.USER_TYPE][String(invitor.inviter_id)];
-					break;
-				}
-				obj = null;
-				references = new Dictionary();
+				request.group_id = obj.group_id;
+				request.inviter_ids = obj.inviter_ids as Array;
 			} catch (error:Error){
 				throw new Error("Exception parsing group request: " + "\nError: " + error.message);
 			}
@@ -226,17 +261,16 @@ package com.yammer.api.utils
 			return request;
 		}
 
-		public static function joinRequests(obj:Object, references:Dictionary):YammerGroupRequest 
+		public static function joinRequests(obj:Object):YammerGroupRequest 
 		{
 			var request:YammerGroupRequest = new YammerGroupRequest();
 			try{
 				request.type = YammerGroupRequest.JOIN_REQUEST;
-				request.group = references[YammerTypes.GROUP_TYPE][String(obj.group_id)];
-				request.user = references[YammerTypes.USER_TYPE][String(obj.user_id)];
+				request.group_id = obj.group_id;
+				request.user_id = obj.user_id;
 	   			
 	   			obj = null;
-				references = new Dictionary();
-			
+	
 			} catch (error:Error){
 				throw new Error("Exception parsing join request: " + "\nError: " + error.message);
 			}

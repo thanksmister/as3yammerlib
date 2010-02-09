@@ -5,10 +5,8 @@
  */
 package com.yammer.api.vo
 {
-	/**
-	 * Class representing message attachments.
-	 * */
-	 [Bindable]
+	import com.yammer.api.constants.YammerAttachmentTypes;
+
 	public class YammerAttachment
 	{
 		public var id:Number;

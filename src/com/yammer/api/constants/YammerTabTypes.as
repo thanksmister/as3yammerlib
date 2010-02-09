@@ -3,8 +3,10 @@
  * @email michael.ritchie@gmail.com
  * @twitter thanksmister
  */
-package com.yammer.api.vo
+package com.yammer.api.constants
 {
+	import com.yammer.api.vo.YammerTab;
+
 	/**
 	 * The YammerTabTypes class contains a list of types for home tabs in current user.
 	 * */
@@ -42,44 +44,7 @@ package com.yammer.api.vo
 		
 		public function YammerTabTypes() 
 		{
+			throw Error("The YammerTabTypes class cannot be instantiated.");
 		}
-		
-		/**
-		 * Returns a list of main home tabs (no groups)
-		 * 
-		 * @param tabList List of home tabs for current user
-		 * @return Array list of main tabs for current user
-		 * */
-		public static function mainTabs(tabList:Array):Array
-		{	
-			var temp:Array = new Array();
-			for each (var tab:YammerTab in tabList){
-				if(tab.type != TAB_GROUP){
-					temp.push(tab);
-				}
-			}
-			
-			return temp;
-		}
-		
-		/**
-		 * Returns a list of group home tabs (no groups)
-		 * 
-		 * @param tabList List of home tabs for current user
-		 * @return Array list of group tabs for current user
-		 * */
-		public static function groupTabs(tabList:Array):Array
-		{	
-			var temp:Array = new Array();
-			for each (var tab:YammerTab in tabList){
-				if(tab.type == TAB_GROUP){
-					temp.push(tab);
-				}
-			}
-			
-			return temp;
-		}
-		
-		
 	}
 }

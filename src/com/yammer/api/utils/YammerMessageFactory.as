@@ -9,9 +9,10 @@ package com.yammer.api.utils
 	import com.yammer.api.vo.YammerGroup;
 	import com.yammer.api.vo.YammerLikedByNames;
 	import com.yammer.api.vo.YammerMessage;
+	import com.yammer.api.vo.YammerMessageList;
 	import com.yammer.api.vo.YammerTag;
 	import com.yammer.api.vo.YammerThread;
-	import com.yammer.api.vo.YammerTypes;
+	import com.yammer.api.constants.YammerTypes;
 	import com.yammer.api.vo.YammerUser;
 	
 	import flash.utils.Dictionary;
@@ -25,12 +26,12 @@ package com.yammer.api.utils
 		{
 		}
 		
-		public static function createMessages(list:Array, references:Dictionary, followed_user_ids:Array = null, liked_message_ids:Array = null, favorite_message_ids:Array = null):Array
+		public static function createMessages(list:Array, messageList:YammerMessageList = null):Array
 		{
 			var messages:Array = new Array();
 			
 			for each (var msg:Object in list){
-				var message:YammerMessage = createMessage(msg, references, followed_user_ids, liked_message_ids, favorite_message_ids);
+				var message:YammerMessage = createMessage(msg, messageList);
 				messages.push(message);
 			}
 
@@ -39,10 +40,10 @@ package com.yammer.api.utils
 			return messages;
 		}
 		
-		public static function createMessage(obj:Object, references:Dictionary, followed_user_ids:Array = null, liked_message_ids:Array = null, favorite_message_ids:Array = null):YammerMessage 
+		public static function createMessage(obj:Object, messageList:YammerMessageList = null):YammerMessage 
 		{	
 			var message:YammerMessage = new YammerMessage();
-		
+	
 			try{
 				if(obj.id) message.id = obj.id; 
 				if(obj.message_type) message.type = obj.message_type;
@@ -52,6 +53,7 @@ package com.yammer.api.utils
 				if(obj.sender_type) message.sender_type = obj.sender_type;
 				if(obj.sender_id) message.sender_id = obj.sender_id;
 				
+				/*
 				if(message.sender_type == YammerTypes.GUIDE_TYPE) {
 					message.sender = references[YammerTypes.GUIDE_TYPE][message.sender_id];
 				} else if (message.sender_type == YammerTypes.BOT_TYPE){
@@ -61,8 +63,11 @@ package com.yammer.api.utils
 				} else if (message.sender_type == YammerTypes.USER_TYPE){
 					message.sender = references[YammerTypes.USER_TYPE][message.sender_id];
 				}
+				*/
 				
-				// identify from list of followers if sender is being followed
+				// TODO  identify from list of followers if sender is being followed
+				
+				/*
 				if(message.sender){
 					for each (var followid:String in followed_user_ids) {
 						if(message.sender_id == followid) {
@@ -71,31 +76,38 @@ package com.yammer.api.utils
 						} 
 					}
 				}
+				*/
 				
 				// liked by counts, permalinks, and full names appeneded to each message
 				if(obj.liked_by) message.liked_by_count = Number(obj.liked_by.count);
 				if(obj.liked_by) message.liked_by_names = getLikedNames(obj.liked_by.names as Array);
 				
-				// identify message as liked message from the meta information on message list
-				for each (var likeid:String in liked_message_ids) {
+				//  identify message as liked message from the meta information on message list
+				for each (var likeid:String in messageList.liked_message_ids) {
 					if(message.id == likeid) message.is_liked = true;
 				}
-				
+			
 				// identify message as favorite message from the meta information on message list
-				for each (var favoriteid:String in favorite_message_ids) {
+				for each (var favoriteid:String in messageList.favorite_message_ids) {
 					if(message.id == favoriteid) message.is_favorite = true;
 				}
 				
 				// group message was posted in
+				if(obj.group_id) message.group_id = obj.group_id;
+				
+				/*
 				if(obj.group_id){
 					message.group_id = obj.group_id;
 					if(message.group_id) {
 				 		message.group = references[YammerTypes.GROUP_TYPE][message.group_id];
 					}
 				}
+				*/
 				
 				if(obj.thread_id) message.thread_id = obj.thread_id;
+				if(obj.replied_to_id) message.reply_to_id = obj.replied_to_id;
 				
+				/*
 				if(obj.replied_to_id) {
 					message.reply_to_id = obj.replied_to_id;
 					if(references[YammerTypes.MESSAGE_TYPE][message.reply_to_id]){
@@ -106,13 +118,18 @@ package com.yammer.api.utils
 						} catch (e:Error){ trace(">>Error finding message: " + e.message);}	
 					}
 				} 
+				*/
 				
+				if(obj.direct_to_id) message.direct_to_id = obj.direct_to_id;
+					
+				/*
 				if(obj.direct_to_id) {
 					message.direct_to_id = obj.direct_to_id;
 					if (message.direct_to_id) { 
 						message.recipient = references[YammerTypes.USER_TYPE][message.direct_to_id];
 					}
 				} 
+				*/
 				
 				if(obj.client_type) message.client_type = obj.client_type;
 				if(obj.client_url) message.client_url = obj.client_url;
@@ -125,6 +142,8 @@ package com.yammer.api.utils
 				}
 	
 				if(obj.system_message) message.system_message = (obj.system_message == 'true') ? true : false;
+				
+				// TODO move this to cach manager?   attachments usually not duplicated on other objects
 				message.attachments = getAttachments(obj.attachments as Array);
 	
 				obj = null;
@@ -157,57 +176,6 @@ package com.yammer.api.utils
 			}
 			list = null;
 			return arr;
-		}
-	
-		public static function createReferences(list:Array, followed_user_ids:Array = null, liked_message_ids:Array = null, favorite_message_ids:Array = null):Dictionary
-		{	
-			var dictionary:Dictionary = new Dictionary();
-				dictionary[YammerTypes.USER_TYPE] = new Dictionary();
-				dictionary[YammerTypes.MESSAGE_TYPE] = new Dictionary();
-				dictionary[YammerTypes.BOT_TYPE] = new Dictionary();
-				dictionary[YammerTypes.GROUP_TYPE] = new Dictionary();
-				dictionary[YammerTypes.THREAD_TYPE] = new Dictionary();
-				dictionary[YammerTypes.TAG_TYPE] = new Dictionary();
-				dictionary[YammerTypes.GUIDE_TYPE] = new Dictionary();
-			
-			var ref:Object;
-			
-			for each (ref in list) {
-				if(ref.type == YammerTypes.USER_TYPE){
-					var user:YammerUser = YammerUserFactory.createUser(ref);
-					dictionary[YammerTypes.USER_TYPE][user.id] = user;
-					
-				} else if (ref.type == YammerTypes.MESSAGE_TYPE){
-					var message:YammerMessage = createMessage(ref, dictionary, followed_user_ids, liked_message_ids, favorite_message_ids);
-					dictionary[YammerTypes.MESSAGE_TYPE][message.id] = message;
-					
-				} else if (ref.type == YammerTypes.BOT_TYPE){
-					var bot:YammerUser = YammerUserFactory.createUser(ref);
-					dictionary[YammerTypes.BOT_TYPE][bot.id] = bot;
-					
-				} else if (ref.type == YammerTypes.GROUP_TYPE){
-					var group:YammerGroup = YammerFactory.group(ref);
-					dictionary[YammerTypes.GROUP_TYPE][group.id] = group;
-					
-				} else if (ref.type == YammerTypes.THREAD_TYPE){
-					var thread:YammerThread = YammerFactory.thread(ref);
-					dictionary[YammerTypes.THREAD_TYPE][thread.id] = thread;
-					
-				} else if (ref.type == YammerTypes.TAG_TYPE){
-					var tag:YammerTag = YammerFactory.tag(ref);
-					dictionary[YammerTypes.TAG_TYPE][tag.id] = tag;
-					
-				} else if (ref.type == YammerTypes.GUIDE_TYPE){
-					var guide:YammerUser = YammerUserFactory.createUser(ref);
-					dictionary[YammerTypes.GUIDE_TYPE][guide.id] = guide;
-				}
-			}
-			
-			ref = null;
-			
-			list = null;
-			
-			return dictionary;
 		}
 	}
 }

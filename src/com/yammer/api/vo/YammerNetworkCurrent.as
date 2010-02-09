@@ -5,6 +5,8 @@
  */
 package com.yammer.api.vo 
 {
+	import com.yammer.api.constants.YammerTypes;
+
 	public class YammerNetworkCurrent
 	{
 		public var name:String;

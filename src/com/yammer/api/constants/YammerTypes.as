@@ -3,7 +3,7 @@
  * @email michael.ritchie@gmail.com
  * @twitter thanksmister
  */
-package com.yammer.api.vo
+package com.yammer.api.constants
 {
 	/**
 	 * The YammerTypes class contains a list of Yammer object types.
@@ -57,6 +57,7 @@ package com.yammer.api.vo
 		
 		public function YammerTypes() 
 		{
+			throw Error("The YammerTypes class cannot be instantiated.");
 		}
 	}
 }

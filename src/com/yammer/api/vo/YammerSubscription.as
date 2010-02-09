@@ -6,7 +6,7 @@
  */
 package com.yammer.api.vo 
 {
-	import com.yammer.api.YammerPaths;
+	import com.yammer.api.constants.YammerPaths;
 	
 	public class YammerSubscription
 	{
@@ -46,7 +46,6 @@ package com.yammer.api.vo
 				user.job_title = this.job_title;
 				user.url = this.url;
 				user.name = this.name;
-				user.is_followed = true; // all subcriptions are followed
 			return user;
 		}
 		

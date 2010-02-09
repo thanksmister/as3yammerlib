@@ -5,14 +5,16 @@
  */
 package com.yammer.api.vo 
 {
+	import com.yammer.api.constants.YammerTypes;
+
 	public class YammerGroupRequest 
 	{
 		public var id:Number;
 		public var type:String = YammerTypes.GROUP_TYPE;
 		
-		public var user:YammerUser;
-		public var group:YammerGroup;
-		
+		public var user_id:String;
+		public var group_id:String;
+		public var inviter_ids:Array;
 		public var web_url:String;
 		public var url:String;
 		public var created:Date;

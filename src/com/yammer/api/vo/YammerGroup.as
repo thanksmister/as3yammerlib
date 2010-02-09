@@ -5,7 +5,8 @@
  */
 package com.yammer.api.vo 
 {
-	import com.yammer.api.YammerPaths;
+	import com.yammer.api.constants.YammerPaths;
+	import com.yammer.api.constants.YammerGroupTypes;
 	
 	public class YammerGroup 
 	{
@@ -22,9 +23,6 @@ package com.yammer.api.vo
 		public var updates:Number;
 		private var _mugshoturl:String;
 		
-		public var is_private:Boolean = false; // convienance flag for private group
-		public var has_joined:Boolean = false; // convienance flag set when current user follows group
-		
 		public function YammerGroup(){}
 		
 		public function set mugshot_url(value:String):void 
@@ -38,6 +36,15 @@ package com.yammer.api.vo
 			if (!u) { return ""; }
 			u = validateLink(u);
 			return u;
+		}
+		
+		public function isPrivate():Boolean
+		{
+			if(this.privacy == YammerGroupTypes.PRIVACY_PRIVATE){
+				return true;
+			}
+			
+			return false;
 		}
 		
 		private function validateLink(s:String):String 

@@ -3,7 +3,7 @@
  * @email michael.ritchie@gmail.com
  * @twitter thanksmister
  */
-package com.yammer.api.vo
+package com.yammer.api.constants
 {
 	public class YammerMessageTypes
 	{	

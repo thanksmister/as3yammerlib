@@ -15,7 +15,9 @@ package com.yammer.api.vo
 		public var tags:Array;
 		public var groups:Array;
 		public var messages:Array;
-		public var references:Dictionary;
+		
+		
+		//public var references:Dictionary;
 
 		public var count_groups:Number = 0;
 		public var count_messages:Number = 0;

@@ -6,20 +6,12 @@
 package com.yammer.api
 { 
 	import com.adobe.serialization.json.JSON;
-	import com.yammer.api.events.YammerEvent;
-	import com.yammer.api.utils.FileUtils;
-	import com.yammer.api.utils.MultipartFormHelper;
-	import com.yammer.api.utils.YammerFactory;
-	import com.yammer.api.utils.YammerParser;
-	import com.yammer.api.vo.YammerGroup;
-	import com.yammer.api.vo.YammerMessageList;
-	import com.yammer.api.vo.YammerSearch;
-	import com.yammer.api.vo.YammerTag;
-	import com.yammer.api.vo.YammerTypes;
-	import com.yammer.api.vo.YammerUser;
+	import com.yammer.api.constants.*;
+	import com.yammer.api.signals.*;
+	import com.yammer.api.utils.*;
+	import com.yammer.api.vo.*;
 	
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
@@ -32,234 +24,10 @@ package com.yammer.api
 	import flash.net.navigateToURL;
 	import flash.system.Capabilities;
 	
-	
-	/**
-	* 	Broadcast when results have been loaded from requestToken() call.
-	*
-	* 	The event contains the following resultObject properties		
-	* 	data.oauth_token and data.oauth_token_secret. 	
-	* 
-	* 	@eventType com.yammer.api.events.YammerEvent.REQUEST_TOKEN
-	* 
-	*/
-	[Event(name="requestToken", type="com.yammer.api.events.YammerEvent")]
+	import org.osflash.signals.Signal;
 	
 	
-	/**
-	* 	Broadcast when results have been loaded from accessToken() call.
-	*
-	* 	The event contains the following resultObject properties		
-	* 	data.oauth_token and data.oauth_token_secret.	
-	* 
-	* 	@eventType com.yammer.api.events.YammerEvent.ACCESS_TOKEN
-	* 
-	*/
-	[Event(name="accessToken", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when request fails.
-	 *
-	 * 	@eventType com.yammer.api.events.YammerEvent.REQUEST_FAIL
-	 * 
-	 */
-	[Event(name="requestFail", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when request completes (usually 200 or 201 status).
-	 *
-	 * 	@eventType com.yammer.api.events.YammerEvent.REQUEST_COMPLETE
-	 * 
-	 */
-	[Event(name="requestComplete", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when on httpStatus event
-	 *
-	 * 	@eventType com.yammer.api.events.YammerEvent.HTTP_STATUS
-	 * 
-	 */
-	[Event(name="httpStatus", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when on ioError event
-	 *
-	 * 	@eventType com.yammer.api.events.YammerEvent.IO_ERROR
-	 * 
-	 */
-	[Event(name="ioError", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when on securityError event
-	 *
-	 * 	@eventType com.yammer.api.events.YammerEvent.SECURITY_ERROR
-	 * 
-	 */
-	[Event(name="securityError", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast file progress events.
-	 * 
-	 * 	The event contains the following resultObject properties		
-	 * 	bytes.
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.PROGRESS
-	 * 
-	 */
-	[Event(name="progress", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	* 	Broadcast when results have been loaded from getCurrentUser().
-	*
-	* 	The event contains the following resultObject properties		
-	* 	data.user. An YammerUser object.	
-	* 
-	* 	@eventType com.yammer.api.events.YammerEvent.CURRENT_USER
-	* 
-	*/
-	[Event(name="currentUser", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getNetworks().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.networks. An array of YammerNetwork objects.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.NETWORKS_REQUEST
-	 * 
-	 */
-	[Event(name="networksRequest", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getCurrentNetworks().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.networks. An array of YammerNetworkCurrent objects.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.NETWORKS_CURRENT_REQUEST
-	 * 
-	 */
-	[Event(name="networksCurrentRequest", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getMessages().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.messages. An array of YammerMessage objects.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.MESSAGES_REQUEST_RESULTS
-	 * 
-	 */
-	[Event(name="messagesRequestResults", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getGroup().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.group. An array of YammerMessage objects.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.GROUP_REQUEST_RESULTS
-	 * 
-	 */
-	[Event(name="groupRequestResults", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getUser().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.user. A YammerUser object.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.USER_REQUEST_RESULTS
-	 * 
-	 */
-	[Event(name="userRequestResults", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getTag().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.tag. A YammerTag object.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.TAG_REQUEST_RESULTS
-	 * 
-	 */
-	[Event(name="tagRequestResults", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getRSS().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.rss. A YammerUser object.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.RSS_REQUEST_RESULTS
-	 * 
-	 */
-	[Event(name="rssRequestResults", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from searchResources().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.search. A YammerSearch object.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.SEARCH_REQUEST_RESULTS
-	 * 
-	 */
-	[Event(name="searchRequestResults", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from autoCompleteSearch().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.matches. An array of YammerTag, YammerUser, YammerGroup objects.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.AUTO_COMPLETE_RESULTS
-	 * 
-	 */
-	[Event(name="autoCompleteResults", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	/**
-	 * 	Broadcast when results have been loaded from getSuggestions().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.suggestions. An array of YammerSuggestions objects.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.SUGGESTIONS_RESULTS
-	 * 
-	 */
-	[Event(name="suggestionsResults", type="com.yammer.api.events.YammerEvent")]
-	
-
-	/**
-	 * 	Broadcast when results have been loaded from getRequests().
-	 *
-	 * 	The event contains the following resultObject properties		
-	 * 	data.requests. An array of YammerRequest objects.	
-	 * 
-	 * 	@eventType com.yammer.api.events.YammerEvent.REQUESTS_RESULTS
-	 * 
-	 */
-	[Event(name="requestsResult", type="com.yammer.api.events.YammerEvent")]
-	
-	
-	
-	public class Yammer extends EventDispatcher	
+	public class Yammer
 	{	
 		/**
 		 * @private
@@ -284,12 +52,7 @@ package com.yammer.api
 		/**
 		 * @private
 		 */
-		protected var oauthTokenSecret:String;
-		
-		/**
-		 * @private
-		 */
-		protected var oauthToken:String;
+		protected var oauth:Oauth;
 		
 		/**
 		 * @private
@@ -313,26 +76,36 @@ package com.yammer.api
 		
 		
 		/**
+		 * Signal for results
+		 * */
+		public var resultsReceived:Signal;
+		public var eventCompleted:EventCompletedSignal;
+		public var errorReceived:ErrorReceivedSignal;
+		public var httpStatusUpdated:HttpStatusUpdatedSignal;
+		
+		/**
 		 * Yammer library handles connecting to the Yammer API (https://www.yammer.com/api_doc.html). 
 		 * The initialize method allows you to authenticate requests by passing the user's credentials
 		 * and sign requests by passing your application's credentials.
+		 * 
+		 * <p>The Yammer service uses AS3 Signals to broadcast when request results are received or if
+		 * an error occured with the service call. There are three types of signals:
+		 * 
+		 * Signal - the default AS3 Signal used for results of service call
+		 * ErrorReceivedSignal - custom signal used for error received with service call, contains <code>YammerError</code> object
+		 * EventCompleteSignal - sent when the service just returns status 200, this returns nothing
+		 * HttpStatusUpdatedSignal - sends updates of the http status codes, type is int
+		 * 
+		 * For more information about AS3 Signals: http://github.com/robertpenner/as3-signals
+		 * </p>
 		 *
 		 * <p>Here's an example of authorizing the Yammer service and doing the OAuth dance.  
 		 * Please note you will need your own consumer key and secret for the Yammer API available at:
 		 * https://www.yammer.com/yammerdevelopersnetwork/client_applications/new </p>
-		 * 
-		 * <p>A YammerRequest will dispatch the following service events.  For additional events @see <code>YammerEvent</code>.: 
-		 * 	REQUEST_COMPLETE
-		 * 	REQUEST_FAIL
-		 * 	REQUEST_TOKEN
-		 * 	ACCESS_TOKEN
-		 * 	CURRENT_USER
-		 * 	MESSAGES_REQUEST_RESULTS
-		 * 	</p>
 		 *
 		 * <listing>
 		 * import com.yammer.api.Yammer;
-		 * import com.yammer.api.YammerEvent;
+		 * import com.yammer.api.vo.YammerError
 		 * import com.yammer.api.vo.YammerMessageList;
 		 * import com.yammer.api.vo.YammerTab;
 		 * import com.yammer.api.vo.YammerUser;
@@ -351,67 +124,67 @@ package com.yammer.api
 		 * private function initializeService():void {
 		 * 		// replace with your own consumer key and secret values
 		 * 		service:Yammer = new Yammer(consumerKey, consumerSecret); 
-		 * 		
+		 * 		service.errorReceived.add errorReceived);
+		 * 
 		 * 		if(oauthToken && oauthSecret) { 
 		 * 			// we previously authorized app and set the values in the service using stored oauth values
 		 * 			service.setOuthTokens(oauthToken, oauthSecret);
 		 * 		} else { 
 		 * 			// first time to authorize app and so we do the aouth dance
+		 * 			service.resultsReceived.add(requestTokenReceived);
 		 * 			service.requestToken(); 
-		 * 			service.addEventListener(YammerEvent.REQUEST_TOKEN, requestTokenHandler);
-		 * 			service.addEventListener(YammerEvent.REQUEST_FAIL, requestFailureHandler);
 		 * 		}
 		 * }
 		 *
 		 * //Handle request token event, returns request token and secret. 
-		 * private function requestTokenHandler(event:YammerEvent):void {
-		 * 		service.removeEventListener(YammerEvent.REQUEST_TOKEN, requestTokenHandler);
+		 * private function requestTokenReceived(event:YammerEvent):void {
+		 * 		service.resultsReceived.remove(requestTokenReceived);
 		 *		service.sendAuthorizationRequest(); // open browser window to autorize application and get verify pin
 		 * }
 		 * 
 		 * //Users must manually copy and enter the verify pin from the request authorization browser page
 		 * private function requestAccessToken(verify_pin:String):void {
-		 *  	service.addEventListener(YammerEvent.ACCESS_TOKEN, accessTokenHandler);
+		 *  	service.resultsReceived.add(accessTokenReceived);
 		 * 		service.accessToken(verify_pin);
 		 * }
 		 * 
 		 * //Handle access token event, returns access token and secret. 
-		 * private function accessTokenHandler(event:YammerEvent):void {
-		 * 		service.removeEventListener(YammerEvent.ACCESS_TOKEN, accessTokenHandler);
+		 * private function accessTokenReceived(value:Oauth):void {
+		 * 		service.resultsReceived.add(accessTokenReceived);
 		 * 		
 		 * 		// You may want to store these values in SO or local store so you can set have next time application is run
-		 *		oauthToken = String(event.data.oauth_token);
-		 *		oauthSecret = String(event.data.oauth_token_secret);
+		 *		oauthToken = value.oauth_token;
+		 *		oauthSecret = value.oauth_token_secret;
 		 * }
 		 *
 		 * // Send request for current user
 		 * private function getCurrentUser():void {
-		 * 		service.addEventListener(YammerEvent.CURRENT_USER, currentUserHandler);
+		 * 		service.resultsReceived.add(currentUserReceived);
 		 * 		service.getCurrentUser();
 		 * }
 		 * 
 		 * // The user is returned as a YammerUser object
-		 * private function currentUserHandler(event:YammerEvent):void
+		 * private function currentUserReceived(value:CurrentYammerUser):void
 		 * {
-		 * 		service.removeEventListener(YammerEvent.CURRENT_USER, currentUserHandler);
-		 * 		var user:YammerUser = event.data.user as YammerUser;
+		 * 		service.resultsReceived.remove(currentUserReceived);
+		 * 		var user:YammerUser = value;
 		 * 		getMessages(user.tabs[0] as YammerTab); // get the first tab of the current user
 		 * }
 		 * 
 		 * // Get a list of messages for the main tab of the current user
 		 * private function getMessages(tab:YammerTab):void {
-		 * 		service.addEventListener(YammerEvent.MESSAGES_REQUEST_RESULTS, handleMessageList);
+		 * 		service.resultsReceived.add(messageListReceived);
 		 * 		service.getMessages(tab.url); // the url of the tab
 		 * }
 		 * 
 		 * // Messages are returned in a YammerMessageList object
-		 * private function handleMessageList(event:YammerEvent):void {
-		 * 		service.removeEventListener(YammerEvent.MESSAGES_REQUEST_RESULTS, handleMessageList);
-		 * 		var messageList:YammerMessageList = event.data.messageList as YammerMessageList;
-		 * 		var messages:Array = messageList.messages;
+		 * private function messageListReceived(value:YammerMessageList):void {
+		 * 		service.resultsReceived.remove(handleMessageList);
+		 * 		var messageList:YammerMessageList = value;
+		 * 		var messages:Array = messageList.getMessages();
 		 * }
 		 * 
-		 * private function requestFailureHandler(event:YammerEvent):void {
+		 * private function errorReceived(error:YammerError):void {
 		 *     //Handle failure
 		 * }
 		 * </listing>
@@ -421,6 +194,12 @@ package com.yammer.api
 			if (consumerKey && consumerSecret) setConsumerInformation(consumerKey, consumerSecret);
 			
 			airClient = (Capabilities.playerType.toLowerCase() == "desktop") ? true : false; // are we using an AIR application?
+			
+			oauth = new Oauth();
+			resultsReceived = new Signal();
+			eventCompleted = new EventCompletedSignal();
+			errorReceived = new ErrorReceivedSignal();
+			httpStatusUpdated = new HttpStatusUpdatedSignal();
 		}
 		
 		/**
@@ -448,8 +227,7 @@ package com.yammer.api
 		 */
 		public function setOuthTokens(oauthToken:String, oauthTokenSecret:String):void 
 		{
-			this.oauthToken = oauthToken;
-			this.oauthTokenSecret = oauthTokenSecret;
+			this.oauth = new Oauth(oauthToken, oauthTokenSecret);
 		}
 	
 		/**
@@ -458,6 +236,8 @@ package com.yammer.api
 		 * 
 		 * @param consumer_key  The application consumer key
 		 * @param consumer_secret The application consumer secret
+		 * 
+		 * @return <code>Oauth</code> object
 		 * */
 		public function requestToken():void 
 		{	
@@ -472,7 +252,6 @@ package com.yammer.api
 				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
 				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOErrorXML);
 				urlLoader.load(urlRequest);
-				//trace(urlRequest.url);
 		}
 		
 		/**
@@ -483,20 +262,20 @@ package com.yammer.api
 		{
 			var urlvars:URLVariables = new URLVariables(String(event.target.data));
 			
-			this.oauthToken = urlvars.oauth_token;
-			this.oauthTokenSecret = urlvars.oauth_token_secret;
+			this.oauth = new Oauth(urlvars.oauth_token, urlvars.oauth_token_secret);
 			
-			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_TOKEN, {'oauth_token':oauthToken, 'oauth_token_secret':oauthTokenSecret}));
+			resultsReceived.dispatch(this.oauth);
 		}
 		
 		/**
 		 *  Once we have the request tokens, we direct user to the Yammer website for to get the verification pin.
 		 *  This will open the users default web browse. 
+		 * 
         * */
         public function sendAuthorizationRequest():void 
         {
 			var urlRequest : URLRequest = new URLRequest ();
-				urlRequest.url = YammerPaths.OAUTH_AUTHORIZE + "?oauth_token=" + this.oauthToken;
+				urlRequest.url = YammerPaths.OAUTH_AUTHORIZE + "?oauth_token=" + this.oauth.oauth_token;
 				
 			navigateToURL(urlRequest, "_blank");  
 		}
@@ -518,6 +297,8 @@ package com.yammer.api
 		 * the appliation, user will need to copy the pin into your application.
 		 * 
 		 * @param verify_pin The Oauth verification pin
+		 * 
+		 * @return <code>Oauth</code> object
 		 * */
 		public function accessToken( verify_pin:String ):void 
 		{
@@ -536,17 +317,16 @@ package com.yammer.api
 		
 		/**
 		 * Returns the oauth token and secret so the application may store these values the
-		 * next time the user logs into the application.
+		 * next time the user logs into the application. 
 		 * */
 		private function onAccessToken(event:Event):void
 		{
 			var xml:XML = new XML(event.target.data);	
 			var urlvars:URLVariables = new URLVariables(String(event.target.data));
 			
-			this.oauthToken = urlvars.oauth_token;
-			this.oauthTokenSecret = urlvars.oauth_token_secret;
-			
-			dispatchEvent(new YammerEvent(YammerEvent.ACCESS_TOKEN, {'oauth_token':oauthToken, 'oauth_token_secret':oauthTokenSecret}));
+			this.oauth = new Oauth(urlvars.oauth_token, urlvars.oauth_token_secret);
+		
+			resultsReceived.dispatch(this.oauth);
 		}
 		
 		/**
@@ -556,6 +336,8 @@ package com.yammer.api
 		 * 
 		 * @param username Yammer username
 		 * @param password Yammer password;
+		 * 
+		 * @return <code>Oauth</code> object
 		 * */
 		public function accessWrapToken(username:String, password:String):void
 		{
@@ -570,7 +352,7 @@ package com.yammer.api
 			var urlLoader:URLLoader = new URLLoader();
 			urlLoader.addEventListener(Event.COMPLETE, onAccessWrapToken);
 			urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
-			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOErrorWrap);
 			urlLoader.load(urlRequest);
 		}
 		
@@ -582,10 +364,9 @@ package com.yammer.api
 		{	
 			var urlvars:URLVariables = new URLVariables(String(event.target.data));
 			
-			this.oauthToken = urlvars.wrap_access_token;
-			this.oauthTokenSecret = urlvars.wrap_refresh_token;
+			this.oauth = new Oauth(urlvars.wrap_access_token, urlvars.wrap_refresh_token);
 			
-			dispatchEvent(new YammerEvent(YammerEvent.ACCESS_TOKEN, {'oauth_token':oauthToken, 'oauth_token_secret':oauthTokenSecret}));
+			resultsReceived.dispatch(this.oauth);
 		}
 		
 		//---------------------------------------------------------//
@@ -596,27 +377,14 @@ package com.yammer.api
 		 * Retrieves a list of all networks and tokens for current user.
 		 * The information is needed if you want to offer user option to switch
 		 * multiple networks.
+		 * 
+		 * @return Array of <code>YammerNetwork</code> objects
 		 * */
 		public function getNetworks():void
 		{
 			var urlRequest:URLRequest = createRequest(YammerPaths.NETWORKS);
 			var urlLoader:URLLoader = new URLLoader();
 				urlLoader.addEventListener(Event.COMPLETE, onNetworks);
-				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
-				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
-				urlLoader.load(urlRequest);
-		}
-		
-		/**
-		 * Retrieves updated network info of all networks for current user.
-		 * Information includes permalink, unseen message count, network name, id.
-		 * This is useful for knowing the unseen message count for all networks.  
-		 * */
-		public function getCurrentNetworks():void
-		{
-			var urlRequest:URLRequest = createRequest(YammerPaths.NETWORKS_CURRENT);
-			var urlLoader:URLLoader = new URLLoader();
-				urlLoader.addEventListener(Event.COMPLETE, onCurrentNetworks);
 				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
 				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
 				urlLoader.load(urlRequest);
@@ -633,7 +401,25 @@ package com.yammer.api
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
 			var networks:Array = YammerParser.parseNetworks(obj);
-			dispatchEvent(new YammerEvent(YammerEvent.NETWORKS_REQUEST, {"networks":networks}));
+			
+			resultsReceived.dispatch(networks);
+		}
+		
+		/**
+		 * Retrieves updated network info of all networks for current user.
+		 * Information includes permalink, unseen message count, network name, id.
+		 * This is useful for knowing the unseen message count for all networks.  
+		 * 
+		 * @return Array of <code>YammerNetworkCurrent</code> objects
+		 * */
+		public function getCurrentNetworks():void
+		{
+			var urlRequest:URLRequest = createRequest(YammerPaths.NETWORKS_CURRENT);
+			var urlLoader:URLLoader = new URLLoader();
+				urlLoader.addEventListener(Event.COMPLETE, onCurrentNetworks);
+				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+				urlLoader.load(urlRequest);
 		}
 		
 		/**
@@ -647,7 +433,8 @@ package com.yammer.api
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
 			var networks:Array = YammerParser.parseCurrentNetworks(obj);
-			dispatchEvent(new YammerEvent(YammerEvent.NETWORKS_CURRENT_REQUEST, {"networks":networks}));
+			
+			resultsReceived.dispatch(networks);
 		}
 		
 	//---------------------------------------------------------//
@@ -662,7 +449,9 @@ package com.yammer.api
 		 * 
 		 * @param include_followed_users  Boolean flag to include followed users in return data
 		 * @param include_followed_tags  Boolean flag to include followed tags in return data
-		 * @param include_group_memberships  Boolean flag to include group memberships in return data
+		 * @param include_group_memberships  Boolean flag to include group memberships in return data (this flag doesn't seem to be working in API)
+		 * 
+		 * @return Array of <code>YammerCurrentUser</code>
 		 */
 		public function getCurrentUser(include_followed_users:Boolean = false, include_followed_tags:Boolean = false, include_group_memberships:Boolean = false):void 
 		{
@@ -690,25 +479,29 @@ package com.yammer.api
 		private function onCurrentUser(event:Event):void
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
-			var user:YammerUser = YammerFactory.user(obj);
-			dispatchEvent(new YammerEvent(YammerEvent.CURRENT_USER, {"user":user}));
+			var user:YammerUser = YammerParser.parseCurrentUser(obj);
+		
+			resultsReceived.dispatch(user);
 		}
 		
+		
 		/**
-		 * Request for user.
-		 * @param path The url path for the <code>YammerUser</code> object
+		 * Request for user from network.
+		 * 
+		 * @param user_id Id of user to retrieve
+		 * 
+		 * @return Array of <code>YammerUser</code>
 		 * */
-		public function getUser(path:String):void	
-		{			
-			path = path + YammerPaths.JSON; // json
-			
+		public function getUsers(user_id:String):void
+		{
+			var path:String = YammerPaths.USERS + user_id + YammerPaths.JSON; 
 			var urlRequest : URLRequest = createRequest(path);
 			var urlLoader:URLLoader = new URLLoader();
 				urlLoader.addEventListener(Event.COMPLETE, handleGetUser);
 				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
 				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
 				urlLoader.load(urlRequest);
-		}
+		}	
 		
 		/**
 		 * Result handler group request.  Converts result object to
@@ -720,8 +513,9 @@ package com.yammer.api
 		private function handleGetUser(event:Event):void
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
-			var user:YammerUser = YammerFactory.user( obj );
-			dispatchEvent( new YammerEvent( YammerEvent.USER_REQUEST_RESULTS, {"user":user}) );
+			var user:YammerUser = YammerParser.parseUser(obj);
+		
+			resultsReceived.dispatch(user);
 		}
 		
 		/**
@@ -1059,7 +853,8 @@ package com.yammer.api
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
 			var messageList:YammerMessageList = YammerParser.parseMessages( obj );
-			dispatchEvent( new YammerEvent( YammerEvent.MESSAGES_REQUEST_RESULTS, {"messageList":messageList}) );
+			
+			resultsReceived.dispatch(messageList);
 		}
 		
 		
@@ -1069,11 +864,14 @@ package com.yammer.api
 		
 		/**
 		 * Request for <code>YammerGroup</code>.
+		 * 
 		 * @param path The url path for the <code>YammerGroup</code> object
+		 * 
+		 * @return <code>YammerGroup</code>
 		 * */
-		public function getGroup(path:String):void	
+		public function getGroup(group_id:String):void	
 		{			
-			path = path + YammerPaths.JSON; // json
+			var path:String = YammerPaths.GROUPS + group_id + YammerPaths.JSON; // json
 
 			var urlRequest : URLRequest = createRequest(path);
 			var urlLoader:URLLoader = new URLLoader();
@@ -1093,12 +891,14 @@ package com.yammer.api
 		private function handleGetGroup(event:Event):void
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
-			var group:YammerGroup = YammerFactory.group( obj );
-			dispatchEvent( new YammerEvent( YammerEvent.GROUP_REQUEST_RESULTS, {"group":group}) );
+			var group:YammerGroup = YammerParser.parseGroup(obj);
+			
+			resultsReceived.dispatch(group);
 		}
 		
 		/**
 		 * Join <code>YammerGroup</code>.
+		 * 
 		 * @param group_id The id of the <code>YammerGroup</code> to join
 		 * */
 		public function joinGroup(group_id:String):void
@@ -1119,6 +919,7 @@ package com.yammer.api
 		
 		/**
 		 * Leave <code>YammerGroup</code>.
+		 * 
 		 * @param group_id The id of the <code>YammerGroup> to leave
 		 * */
 		public function leaveGroup(group_id:String):void
@@ -1145,10 +946,12 @@ package com.yammer.api
 		/**
 		 * Request for tag.
 		 * @param path The url path for the <code>YammerTag</code> object
+		 * 
+		 * @return <code>YammerTag</code>
 		 * */
-		public function getTag(path:String):void	
+		public function getTag(tag_id:String):void	
 		{			
-			path = path + YammerPaths.JSON; // json
+			var path:String = YammerPaths.TAGS + tag_id + YammerPaths.JSON; // json
 			
 			var urlRequest : URLRequest = createRequest(path);
 			var urlLoader:URLLoader = new URLLoader();
@@ -1169,7 +972,8 @@ package com.yammer.api
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
 			var tag:YammerTag = YammerFactory.tag( obj );
-			dispatchEvent( new YammerEvent( YammerEvent.TAG_REQUEST_RESULTS, {"tag":tag}) );
+			
+			resultsReceived.dispatch(tag);
 		}
 		
 		/**
@@ -1218,7 +1022,6 @@ package com.yammer.api
 		/**
 		 * Whether user is following a tag. Returns 200 for true, 404 for false.
 		 * @param tag_id id assigned to tag
-		 *
 		 * */
 		public function isFollowingTag(tag_id:Number):void 
 		{
@@ -1238,37 +1041,6 @@ package com.yammer.api
 	//------------------------------------------------------------------//
 	//------------------------  RSS METHODS  ---------------------------/
 	//-----------------------------------------------------------------//
-		
-		/**
-		 * Request for user.
-		 * @param path The url path for the <code>YammerUser</code> object
-		 * */
-		public function getRSS(path:String):void	
-		{			
-			path = path + YammerPaths.JSON; // json
-			
-			var urlRequest : URLRequest = createRequest(path);
-			var urlLoader:URLLoader = new URLLoader();
-				urlLoader.addEventListener(Event.COMPLETE, handleGetRSS);
-				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
-				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
-				urlLoader.load(urlRequest);
-		}
-		
-		/**
-		 * Result handler rss request.  Converts result object to
-		 * <code>YammerUser</code object and dispatch a <code>YammerEvent</code>
-		 * with the parsed object.  An RSS (bot) object is essentially identical
-		 * to a <code>YammerUser</code> object.
-		 * 
-		 * @private
-		 * */
-		private function handleGetRSS(event:Event):void
-		{
-			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
-			var rss:YammerUser = YammerFactory.user( obj );
-			dispatchEvent( new YammerEvent( YammerEvent.RSS_REQUEST_RESULTS, {"rss":rss}) );
-		}
 		
 		/**
 		 * Subscribe to rss (bot) feed.  
@@ -1321,6 +1093,8 @@ package com.yammer.api
 		 * Top looks for "hot" suggestions we'll display for the user.
 		 * 
 		 * @param type Yammer suggestions types (user or group).
+		 * 
+		 * @return Array of <code>YammerSuggestion</code> objects
 		 * */ 
 		public function getSuggestions(type:String = null, top:Boolean = false):void 
 		{ 
@@ -1342,16 +1116,22 @@ package com.yammer.api
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
 			var suggestions:Array = YammerParser.parseSuggestions(obj);
-			dispatchEvent( new YammerEvent( YammerEvent.RSS_REQUEST_RESULTS, {"suggestions":suggestions}) );
+			
+			resultsReceived.dispatch(suggestions);
+	
 			obj = null;
 			suggestions = null;
 		}
 		
-		public function declineSuggestion(id:String):void 
+		/**
+		 * Decline a specific suggestion.
+		 * @param suggestion_id Id of suggestion to decline
+		 * */
+		public function declineSuggestion(suggestion_id:String):void 
 		{
-			var path:String = YammerPaths.SUGGESTIONS + id + ".json";
+			var path:String = YammerPaths.SUGGESTIONS + suggestion_id + ".json";
 			var params:Object = new Object();
-				params.id = id;	   
+				params.id = suggestion_id;	   
 				
 			if(!this.airClient) params.no_201 = true; // needed for web-based application because 201 is not handled
 				
@@ -1363,6 +1143,11 @@ package com.yammer.api
 				urlLoader.load(urlRequest);
 		}       
 		
+		/**
+		 * Gets a list of Yammer requests to join groups.
+		 * 
+		 * @return Array of <code>YammerRequest</code> objects
+		 * */
 		public function getRequests():void 
 		{
 			var path:String = YammerPaths.REQUESTS;
@@ -1378,7 +1163,9 @@ package com.yammer.api
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);
 			var requests:Array = YammerParser.parseRequests(obj);
-			dispatchEvent( new YammerEvent( YammerEvent.RSS_REQUEST_RESULTS, {"requests":requests}) );
+			
+			resultsReceived.dispatch(requests);
+			
 			obj = null;
 			requests = null;
 		}
@@ -1394,6 +1181,8 @@ package com.yammer.api
 		 * 
 		 * @param search The search query
 		 * @param page The number for the page to return
+		 * 
+		 * @return Array of <code>YammerSearch</code> objects
 		*/
 		public function searchResource(search:String, page:Number = 1):void
 		{
@@ -1417,8 +1206,8 @@ package com.yammer.api
 			var search:YammerSearch = YammerParser.parseSearch( obj );
 				search.search_term = this.searchTerm;
 				
-			dispatchEvent( new YammerEvent( YammerEvent.SEARCH_REQUEST_RESULTS, {"search":search}) );
-
+			resultsReceived.dispatch(search);
+				
 			obj = null;
 			search = null;
 		}
@@ -1427,6 +1216,8 @@ package com.yammer.api
 		 * Auto-complete text search returns tags, users, groups matching search text.
 		 * 
 		 * @param search_for The text to search for.
+		 * 
+		 * @return Array of <code>YammerUser</code>, <code>YammerGroup</code>, <code>YammerTags</code> objects
 		 * */
 		public function autoCompleteSearch(search_for:String):void 
 		{
@@ -1450,8 +1241,8 @@ package com.yammer.api
 			var users:Array = YammerParser.parseUserSearch(obj);
 			var matches:Array = users.concat(tags, groups);
 			
-			dispatchEvent( new YammerEvent( YammerEvent.AUTO_COMPLETE_RESULTS, {"matches":matches}) );
-			
+			resultsReceived.dispatch(matches);
+	
 			obj = null;
 			tags = null;
 			groups = null;
@@ -1468,7 +1259,9 @@ package com.yammer.api
 		 * */
 		private function handleRequestComplete(event:Event):void
 		{
-			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_COMPLETE));
+			//dispatchEvent(new YammerEvent(YammerEvent.REQUEST_COMPLETE));
+			
+			this.resultsReceived.dispatch();
 		}
 		
 		/**
@@ -1479,9 +1272,9 @@ package com.yammer.api
 		{
 			var error:YammerError = new YammerError();
 				error.errorMessage = event.text;
-				error.errorCode = YammerError.SECURITY_ERROR;
-			
-			dispatchEvent(new YammerEvent(YammerEvent.SECURITY_ERROR, null, null, error));
+				error.errorCode = YammerErrorTypes.SECURITY_ERROR;
+
+			errorReceived.dispatch(error);
 		}
 		
 		/**
@@ -1510,19 +1303,19 @@ package com.yammer.api
 				if(obj.response) {
 					error.errorCode = obj.response.code;
 					error.errorMessage = obj.response.message;	
+
 				} else {
-					error.errorCode = YammerError.UNKNOWN_ERROR;
+					error.errorCode = YammerErrorTypes.UNKNOWN_ERROR;
 					error.errorMessage = String(event.target.data) + " You may want to check the http status event.";
 					error.errorDetail = event.text;
 				}
 			} catch (e:Error) {
-				trace("Yammer :: handleIOError exception: " + e.message);
-				error.errorCode = YammerError.UNKNOWN_ERROR;
+				error.errorCode = YammerErrorTypes.UNKNOWN_ERROR;
 				error.errorMessage = String(event.target.data) + " You may want to check the http status event.";
 				error.errorDetail = event.text;
 			}
 			
-			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_FAIL, null, null, error));
+			errorReceived.dispatch(error);
 		}
 		
 		/**
@@ -1531,23 +1324,53 @@ package com.yammer.api
 		 * */
 		private function handleHTTPStatus(event:HTTPStatusEvent):void
 		{
-			//trace("YammerRequest :: handleHTTPStatus: " + event.status);
+			trace("YammerRequest :: handleHTTPStatus: " + event.status);
 			
 			var error:YammerError = new YammerError();
 			if(event.status == 503 || event.status == 0) {
-				error.errorCode = YammerError.NO_NETWORK_CONNECTION;
-				error.errorMessage = YammerError.getErrorMessage(YammerError.NO_NETWORK_CONNECTION);
-				dispatchEvent(new YammerEvent(YammerEvent.REQUEST_FAIL, null, null, error));
+				error.errorCode = YammerErrorTypes.NO_NETWORK_CONNECTION;
+				error.errorMessage = YammerError.getErrorMessage(YammerErrorTypes.NO_NETWORK_CONNECTION);
+	
+				errorReceived.dispatch(error);
 			} else if (event.status >= 400) {
-				error.errorCode = event.status;
-				error.errorMessage = YammerError.getErrorMessage(event.status);
-				dispatchEvent(new YammerEvent(YammerEvent.HTTP_STATUS, {"status": event.status}, null, error));
+				this.httpStatusUpdated.dispatch(event.status);
 			} else {
-				dispatchEvent(new YammerEvent(YammerEvent.HTTP_STATUS, {"status": event.status}));
+				this.httpStatusUpdated.dispatch(event.status);
 			}
-			
 		}
 		
+		/**
+		 * If we get an error when calling the wrap oauth, the Yammer service
+		 * only returns http status respone and simple message.  I guess we 
+		 * could make a special HTTP status handler for this.
+		 * 
+		 * 401 Unauthorized, the username or password is invalid or the network is disable
+		 * 403 Forbidden, has two interpretations: (1) The users network uses Single-Sign-On, 
+		 * the user most likely needs to generate an ephemeral password. (2) The username 
+		 * and ephemeral password they're using is invalid. 
+		 * 500 Internal Server Error, the service is not reachable
+		 * */
+		private function handleIOErrorWrap(event:IOErrorEvent):void
+		{
+			var error:YammerError = new YammerError();
+				error.erroEvent = event;
+				error.errorDetail = event.target.data;
+				
+			if(event.target.data == "Unauthorized"){
+				error.errorCode = YammerErrorTypes.UNAUTHORIZED_STATUS;
+				error.errorMessage = YammerError.getErrorMessage(error.errorCode);
+			} else if (event.target.data == "Forbidden") {
+				error.errorCode = YammerErrorTypes.FORBIDDEN_STATUS;
+				error.errorMessage = YammerError.getErrorMessage(error.errorCode);
+			} else if (event.target.data == "Internal Server Error") {
+				error.errorCode = YammerErrorTypes.INTERNAL_SERVER_ERROR;
+				error.errorMessage = YammerError.getErrorMessage(error.errorCode);
+			}
+			
+			trace("YammerRequest :: handleIOErrorWrap: " + event.target.data);
+	
+			errorReceived.dispatch(error);
+		}
 		
 		/**
 		 * If we get an error when calling a non-api method (like oauth), the Yammer service
@@ -1576,16 +1399,17 @@ package com.yammer.api
 					error.errorMessage = xml['response']['message'];
 					error.errorCode = xml['response']['code'];	
 				} else {
-					error.errorCode = YammerError.UNKNOWN_ERROR;
+					error.errorCode = YammerErrorTypes.UNKNOWN_ERROR;
 					error.errorMessage = event.text;
 				}
 			} catch (e:Error) {
-				trace("YammerRequest :: handleIOError: " + e.message);
-				error.errorCode = YammerError.UNKNOWN_ERROR;
+				
+				error.errorCode = YammerErrorTypes.UNKNOWN_ERROR;
 				error.errorMessage = event.text + " You may want to check the http status event.";
 			}
 			
-			dispatchEvent(new YammerEvent(YammerEvent.REQUEST_FAIL, null, null, error));
+			//dispatchEvent(new YammerEvent(YammerEvent.REQUEST_FAIL, null, null, error));
+			errorReceived.dispatch(error);
 		}
 	
 	
@@ -1602,7 +1426,7 @@ package com.yammer.api
 		 * @return URLRequest
 		 * @private
 		 */
-		private function createRequest(path:String, params:Object = null, method:String = URLRequestMethod.GET):URLRequest 
+		private function createRequest(path:String, params:Object = null, method:String = "GET"):URLRequest 
 		{
 			var urlRequest:URLRequest = new URLRequest();
 				urlRequest.url = path;
@@ -1632,7 +1456,6 @@ package com.yammer.api
 				urlRequest.requestHeaders = new Array( new URLRequestHeader("Authorization", createOauthHeader()) );	
 			}
 			
-			
 			// remove oauth_verify after used for authentication
 			if(this.oauthVerifier) {
 				this.oauthVerifier = null;
@@ -1658,9 +1481,9 @@ package com.yammer.api
 				header += this.consumerKey;
 				header += "\", ";
 			
-			if(this.oauthToken != null) {
+			if(this.oauth.oauth_token != null) {
 				header += "oauth_token=\"";
-				header += this.oauthToken;
+				header += this.oauth.oauth_token;
 				header += "\", ";
 			}
 			
@@ -1670,8 +1493,8 @@ package com.yammer.api
 		    header += (this.consumerSecret);
 		    header += ("%26");
 		    
-		    if (this.oauthTokenSecret != null) {
-		      	header += (this.oauthTokenSecret);
+		    if (this.oauth.oauth_token_secret != null) {
+		      	header += (this.oauth.oauth_token_secret);
 		    }
 		    
 		    var date:Date = new Date();
@@ -1690,7 +1513,7 @@ package com.yammer.api
 		
 		    header += ("\", oauth_version=\"1.0\"");
 			
-			trace ("Header: " + header);
+			///trace ("Header: " + header);
 			
 		    return header;
 		}

@@ -8,7 +8,7 @@ package com.yammer.api.utils
 {
 	public class MessageUtilities
 	{
-		public function YammerMessageUtilities():void
+		public function MessageUtilities():void
 		{
 			
 		}

@@ -3,9 +3,8 @@
  * @email michael.ritchie@gmail.com
  * @twitter thanksmister
  */
-package com.yammer.api
+package com.yammer.api.constants
 {
-	import com.yammer.api.constants.YammerURL;
 
 	public class YammerPaths
 	{
@@ -129,6 +128,10 @@ package com.yammer.api
 		public static function get ALL_USERS():String {
 			return API + "users.json";
 		} 	
+		
+		public static function get ALL_GROUPS():String {
+			return API + "groups.json";
+		} 
 		
 		public static function get SEARCH():String {
 			return API + "search.json";

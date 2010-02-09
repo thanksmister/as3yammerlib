@@ -6,7 +6,7 @@
  */
 package com.yammer.api.events
 {
-	import com.yammer.api.YammerError;
+	import com.yammer.api.vo.YammerError;
 	
 	import flash.events.Event;
 	import flash.utils.ByteArray;
