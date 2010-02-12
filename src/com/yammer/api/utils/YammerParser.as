@@ -27,6 +27,7 @@ package com.yammer.api.utils
 		 * */
 		public function YammerParser()
 		{ 
+			throw Error("The YammerParser class cannot be instantiated.");
 		}
 		
 		/**
@@ -38,11 +39,10 @@ package com.yammer.api.utils
 		{
 			var networks:Array = new Array();
 			var network:YammerNetwork = new YammerNetwork();
-			var list:Array = obj.response as Array;
 			
-			for each (var obj:Object in list) {
+			for each (var net:Object in obj) {
 				try {
-					network = YammerFactory.network(obj);
+					network = YammerFactory.network(net);
 					networks.push(network);
 				} catch (error:Error){
 					trace("Exception parsing networks: " + "\nError: " + error.message);
@@ -57,15 +57,14 @@ package com.yammer.api.utils
 		 * @param object JSON data
 		 * @return Array
 		 * */
-		public static  function parseCurrentNetworks(obj:Object):Array 
+		public static  function parseNetworkCounts(obj:Object):Array 
 		{
 			var networks:Array = new Array();
 			var network:YammerNetworkCurrent = new YammerNetworkCurrent();
-			var list:Array = obj.response as Array;
 			
-			for each (var obj:Object in list) {
+			for each (var net:Object in obj) {
 				try {
-					network = YammerFactory.networkCurrent(obj);
+					network = YammerFactory.networkCurrent(net);
 					networks.push(network);
 				} catch (error:Error){
 					trace("Exception parsing current networks: " + "\nError: " + error.message);

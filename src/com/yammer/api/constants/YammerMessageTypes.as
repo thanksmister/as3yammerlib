@@ -18,6 +18,7 @@ package com.yammer.api.constants
 		
 		public function YammerMessageTypes() 
 		{
+			throw Error("The YammerMessageTypes class cannot be instantiated.");
 		}
 	}
 }

@@ -432,7 +432,7 @@ package com.yammer.api
 		private function onCurrentNetworks(event:Event):void
 		{
 			var obj:Object = (JSON.decode(String(event.target.data)) as Object);	
-			var networks:Array = YammerParser.parseCurrentNetworks(obj);
+			var networks:Array = YammerParser.parseNetworkCounts(obj);
 			
 			resultsReceived.dispatch(networks);
 		}
@@ -456,9 +456,9 @@ package com.yammer.api
 		public function getCurrentUser(include_followed_users:Boolean = false, include_followed_tags:Boolean = false, include_group_memberships:Boolean = false):void 
 		{
 			var params:Object = new Object()
-				params.include_followed_users = include_followed_users;
-				params.include_followed_tags = include_followed_tags;
-				params.include_group_memberships = include_group_memberships;
+				if(include_followed_users) params.include_followed_users = include_followed_users;
+				if(include_followed_tags) params.include_followed_tags = include_followed_tags;
+				if(include_group_memberships) params.include_group_memberships = include_group_memberships;
 			
 			var user:YammerUser;
 			var urlRequest:URLRequest = createRequest(YammerPaths.CURRENT_USER, params);
@@ -604,7 +604,7 @@ package com.yammer.api
 			if(newer_than) params.newer_than = newer_than;
 			if(threaded) params.threaded = threaded;
 			if(update_last_seen_message_id) params.update_last_seen_message_id = update_last_seen_message_id;
-		
+		 
 			var urlRequest : URLRequest = createRequest(path, params);
 			var urlLoader:URLLoader = new URLLoader();
 				urlLoader.addEventListener(Event.COMPLETE, messageListHandler);
@@ -1306,12 +1306,12 @@ package com.yammer.api
 
 				} else {
 					error.errorCode = YammerErrorTypes.UNKNOWN_ERROR;
-					error.errorMessage = String(event.target.data) + " You may want to check the http status event.";
+					error.errorMessage = YammerError.getErrorMessage(error.errorCode) +  "You may want to check the http status event.";
 					error.errorDetail = event.text;
 				}
 			} catch (e:Error) {
 				error.errorCode = YammerErrorTypes.UNKNOWN_ERROR;
-				error.errorMessage = String(event.target.data) + " You may want to check the http status event.";
+				error.errorMessage = YammerError.getErrorMessage(error.errorCode) + "You may want to check the http status event.";
 				error.errorDetail = event.text;
 			}
 			
@@ -1324,13 +1324,12 @@ package com.yammer.api
 		 * */
 		private function handleHTTPStatus(event:HTTPStatusEvent):void
 		{
-			trace("YammerRequest :: handleHTTPStatus: " + event.status);
+			//trace("YammerRequest :: handleHTTPStatus: " + event.status);
 			
 			var error:YammerError = new YammerError();
 			if(event.status == 503 || event.status == 0) {
 				error.errorCode = YammerErrorTypes.NO_NETWORK_CONNECTION;
 				error.errorMessage = YammerError.getErrorMessage(YammerErrorTypes.NO_NETWORK_CONNECTION);
-	
 				errorReceived.dispatch(error);
 			} else if (event.status >= 400) {
 				this.httpStatusUpdated.dispatch(event.status);
@@ -1513,7 +1512,7 @@ package com.yammer.api
 		
 		    header += ("\", oauth_version=\"1.0\"");
 			
-			///trace ("Header: " + header);
+			//trace ("Header: " + header);
 			
 		    return header;
 		}

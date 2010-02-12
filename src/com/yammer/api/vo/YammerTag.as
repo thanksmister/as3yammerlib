@@ -13,6 +13,5 @@ package com.yammer.api.vo
 		public var url:String;
 		public var data_url:String;
 		public var followers:String;
-		public var is_followed:Boolean = false;
 	}
 }

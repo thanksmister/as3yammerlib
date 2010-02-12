@@ -18,6 +18,7 @@ package com.yammer.api.utils
 	{
 		public function YammerUserFactory()
 		{
+			throw Error("The YammerUserFactory class cannot be instantiated.");
 		}
 		
 		public static function createCurrentUser(obj:Object):YammerCurrentUser

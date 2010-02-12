@@ -5,9 +5,9 @@
  */
 package com.yammer.api.vo 
 {
-	import com.yammer.api.utils.CacheManager;
 	import com.yammer.api.constants.YammerMessageTypes;
 	import com.yammer.api.constants.YammerTypes;
+	import com.yammer.api.utils.CacheManager;
 
 	public class YammerMessage
 	{
@@ -87,6 +87,26 @@ package com.yammer.api.vo
 		public function get bot():YammerUser
 		{
 			return CacheManager.instance.getBot(this.sender_id);
+		}
+		
+		public function getReferencedUser(id:String):YammerUser
+		{
+			return CacheManager.instance.getUser(id);
+		}
+		
+		public function getReferencesGroup(id:String):YammerGroup
+		{
+			return CacheManager.instance.getGroup(id);
+		}
+		
+		public function getReferencedTag(id:String):YammerTag
+		{
+			return CacheManager.instance.getTag(id);
+		}
+		
+		public function getReferencedBot(id:String):YammerUser
+		{
+			return CacheManager.instance.getBot(id);
 		}
 		
 		public function hasRecipient():Boolean

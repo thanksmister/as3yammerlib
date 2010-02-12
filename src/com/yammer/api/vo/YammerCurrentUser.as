@@ -135,6 +135,19 @@ package com.yammer.api.vo
 		}
 		
 		/**
+		 * Returns tab of type provided by passing in <code>YammerTabTypes</code> constant value.
+		 */
+		[Inspectable(enumeration="following, received, sent, private, group, rss, like", defaultValue=YammerTabTypes.TAB_FOLLOWING)]
+		public function getTab(type:String):YammerTab 
+		{
+			for each (var tab:YammerTab in this.tabs){
+				if (tab.type == type) return tab;
+			}
+			
+			return null;
+		}
+		
+		/**
 		 * Returns a list of main home tabs (no groups)
 		 * 
 		 * @param tabList List of home tabs for current user

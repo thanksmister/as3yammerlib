@@ -176,5 +176,10 @@ package com.yammer.api.constants
 		public static function get TO_USER():String {
 			return "to_user/";
 		} 
+		
+		public function YammerPaths() 
+		{
+			throw Error("The YammerPaths class cannot be instantiated.");
+		}
 	}
 }

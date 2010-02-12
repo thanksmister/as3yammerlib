@@ -62,7 +62,6 @@ package com.yammer.api.vo
 				tag.id = this.id;
 				tag.name = this.name;
 				tag.url = this.url;
-				tag.is_followed = true; // all subcriptions are followed
 			return tag;
 		}
 		

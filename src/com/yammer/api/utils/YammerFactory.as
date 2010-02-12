@@ -26,6 +26,7 @@ package com.yammer.api.utils
 	{
 		public function YammerFactory()
 		{
+			throw Error("The YammerFactory class cannot be instantiated.");
 		}
 		
 		public static function network(obj:Object):YammerNetwork 

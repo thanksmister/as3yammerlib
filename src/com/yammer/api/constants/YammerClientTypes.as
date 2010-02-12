@@ -18,6 +18,7 @@ package com.yammer.api.constants
 		
 		public function YammerClientTypes() 
 		{
+			throw Error("The YammerClientTypes class cannot be instantiated.");
 		}
 	}
 }

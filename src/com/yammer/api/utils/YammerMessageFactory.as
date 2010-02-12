@@ -24,6 +24,7 @@ package com.yammer.api.utils
 	{
 		public function YammerMessageFactory():void
 		{
+			throw Error("The YammerMessageFactory class cannot be instantiated.");
 		}
 		
 		public static function createMessages(list:Array, messageList:YammerMessageList = null):Array
