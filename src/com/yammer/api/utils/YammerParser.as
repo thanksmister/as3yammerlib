@@ -104,13 +104,17 @@ package com.yammer.api.utils
 		 * Parse message list JSON into a usable object. 
 		 * @param object JSON data
 		 * @return YammerMessageList
+		 * 
+		 * TODO: references are only partial objects, we must be careful not to replace
+		 * a full object with a reference.  Right now we accomplish this by parsing
+		 * references first and then replacing them with actual message objects. 
 		 * */
 		public static function parseMessages(obj:Object):YammerMessageList 
 		{
 			var messageList:YammerMessageList = YammerFactory.messageList(obj);
 			
-			if(obj.messages) cacheParsedMessages(obj.messages, messageList);
 			if(obj.references) cacheParsedObjects(obj.references, messageList);
+			if(obj.messages) cacheParsedMessages(obj.messages, messageList);
 			
 			return messageList;
 		}
@@ -327,7 +331,7 @@ package com.yammer.api.utils
 		private static function cacheParsedMessages(list:Object, messageList:YammerMessageList = null):void
 		{	
 			var obj:Object;
-			
+
 			for each (obj in list) {
 				CacheManager.instance.addMessage(YammerMessageFactory.createMessage(obj, messageList));
 			}
@@ -341,7 +345,7 @@ package com.yammer.api.utils
 			var obj:Object;
 
 			for each (obj in list) {
-
+				
 				if (obj.type == YammerTypes.MESSAGE_TYPE){
 					CacheManager.instance.addMessage(YammerMessageFactory.createMessage(obj, messageList));
 				} else if(obj.type == YammerTypes.USER_TYPE){

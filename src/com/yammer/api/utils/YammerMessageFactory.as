@@ -47,6 +47,7 @@ package com.yammer.api.utils
 	
 			try{
 				if(obj.id) message.id = obj.id; 
+				
 				if(obj.message_type) message.type = obj.message_type;
 				if(obj.web_url) message.web_url = obj.web_url;
 				if(obj.url) message.url = obj.url;
@@ -140,6 +141,7 @@ package com.yammer.api.utils
 				if(obj.body){
 					message.body_plain = obj.body.plain; 
 					message.body_parsed = obj.body.parsed;
+			
 				}
 	
 				if(obj.system_message) message.system_message = (obj.system_message == 'true') ? true : false;
