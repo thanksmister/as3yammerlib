@@ -138,6 +138,19 @@ package com.yammer.api.utils
 			return (result +  "<a href=\"event:more\">[more]</a>");
 		}
 		
+		public static function truncateLinks(value:String):String
+		{
+			var pattern:RegExp = /((?:http(?:s?)\:\/\/|www\.[^\.])\S+[A-z0-9\/])/g; 
+			value = value.replace(pattern, cleanLinks);
+			
+			return value;
+		}
+		
+		private static function cleanLinks(matchedSubstring:String, capturedMatch:String, index:int, str:String):String
+		{
+			return truncateText(capturedMatch, 30);
+		}
+		
 		/**
 		 * Remove line breaks from messages.
 		 * 
@@ -204,7 +217,7 @@ package com.yammer.api.utils
 		{
 			for each (var message:YammerMessage in messages) {
 				var date:Date = new Date(message.created_at);
-				message.display_time = (absolute_timestmaps)? DateUtilities.absoluteTimestamp(date):DateUtilities.timeAgoWords(Number(message.created_at));
+				message.display_time = (absolute_timestmaps)? DateUtilities.absoluteTimestamp(date):DateUtilities.timeAgoWords(message.created_at);
 			}
 			return messages;
 		}

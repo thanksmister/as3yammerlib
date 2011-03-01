@@ -5,3 +5,5 @@ This is a AS3 library wrapper for the Yammer API.
 Example: http://thanksmister.com/index.php/archive/as3-yammer-library/
 
 MIT License: http://www.opensource.org/licenses/mit-license.php
+
+This library uses the as3corelib and the as3signals libraries, you will need to download and install those swc libraries to use the Yammer AS3 library. 

@@ -199,6 +199,8 @@ package com.yammer.api.utils
 
 		private static function parseSubscriptions(subscriptions:Array):Array 
 		{
+			trace("YammerUserFactory :: parseSubscriptions: " +  subscriptions );
+			
 			var list:Array = new Array();
 			try{
 				for each (var obj:Object in subscriptions){

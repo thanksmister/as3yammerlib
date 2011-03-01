@@ -13,7 +13,7 @@ package com.yammer.api.vo
 		public var type:String = YammerTypes.THREAD_TYPE;
 		public var thread_starter_id:String;
 		public var web_url:String;
-		public var body:String;
+		public var url:String;
 		public var lastest_reply_at:Date = new Date();
 		public var lastest_reply_id:String;
 		public var first_reply_id:String;

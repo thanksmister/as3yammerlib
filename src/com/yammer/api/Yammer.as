@@ -843,6 +843,44 @@ package com.yammer.api
 		}
 		
 		/**
+		 * Like a <code>YammerMessage</code>.
+		 * @param message_id The id of the message to favorites (aka Bookmarks)
+		 * */
+		public function favoriteMessage(message_id:String):void	
+		{
+			var path:String = YammerPaths.FAVORITES + "current" + YammerPaths.JSON;
+
+			var params:Object = new Object();
+				params.message_id = message_id;   
+			
+			var urlRequest : URLRequest = createRequest(path, params, URLRequestMethod.POST)
+			var urlLoader:URLLoader = new URLLoader();
+				urlLoader.addEventListener(Event.COMPLETE, handleRequestComplete);
+				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+				urlLoader.load(urlRequest);
+		}
+		
+		/**
+		 * Remove a <code>YammerMessage</code> from favorites.
+		 * @param message_id The id of the message to remove from favorites
+		 * (aka Bookmarks)
+		 * */
+		public function unfavoriteMessage(message_id:String):void
+		{
+			var path:String = YammerPaths.FAVORITES + "current" + YammerPaths.JSON;
+			var params:Object = new Object();
+				params.message_id = message_id;   
+
+			var urlRequest : URLRequest = createRequest(path, params, "DELETE");
+			var urlLoader:URLLoader = new URLLoader();
+				urlLoader.addEventListener(Event.COMPLETE, handleRequestComplete);
+				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
+				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
+				urlLoader.load(urlRequest);
+		}
+		
+		/**
 		 * Result handler for message list request.  Convert result object to
 		 * <code>YammerMessageList</code object and dispatch a <code>YammerEvent.MESSAGES_REQUEST_RESULTS</code> 
 		 * event with the parsed object.
@@ -1227,7 +1265,7 @@ package com.yammer.api
 	
 			var urlRequest : URLRequest = createRequest(path, params);
 			var urlLoader:URLLoader = new URLLoader();
-				urlLoader.addEventListener(Event.COMPLETE, handleSearchResource);
+				urlLoader.addEventListener(Event.COMPLETE, handleAutoCompleteSearch);
 				urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, handleHTTPStatus);
 				urlLoader.addEventListener(IOErrorEvent.IO_ERROR, handleIOError);
 				urlLoader.load(urlRequest);
@@ -1465,8 +1503,8 @@ package com.yammer.api
 		
 		
 		/**
-		 * Create the Oath heders for each request.
-		 * Author: Andrew Arrow, Michael RItchie copyright Yammer, Inc, 2009
+		 * Create the Oath headers for each request.
+		 * Author: Andrew Arrow, Michael Ritchie copyright Yammer, Inc, 2009
 		 * 
 		 * @param token OAuthToken value
 		 * @return String value for request header
@@ -1511,9 +1549,7 @@ package com.yammer.api
 		    }
 		
 		    header += ("\", oauth_version=\"1.0\"");
-			
-			//trace ("Header: " + header);
-			
+
 		    return header;
 		}
 

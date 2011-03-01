@@ -86,6 +86,9 @@ package com.yammer.api.utils
 			// group memberships and subscriptions
 			if(obj.group_memberships) user.group_memberships = parseGroups(obj.group_memberships as Array);
 			
+			// group memberships and subscriptions
+			//if(obj.group_memberships) user.group_memberships = parseGroups(obj.group_memberships as Array);
+			
 			return user;     
 		}  
 		

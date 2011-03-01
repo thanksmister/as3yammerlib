@@ -146,8 +146,16 @@ package com.yammer.api.utils
 			var thread:YammerThread = new YammerThread();
 			try {
 				thread.id = obj.id; 
-				thread.body = obj.body; 
+				thread.thread_starter_id = obj.thread_starter_id;
+				thread.url = obj.url;
 				thread.web_url = obj.web_url;
+				
+				thread.lastest_reply_id = obj.stats.latest_reply_id;
+				thread.lastest_reply_at = new Date(String(obj.lastest_reply_at));
+				thread.first_reply_id = obj.first_reply_id;
+				thread.first_reply_at = new Date(String(obj.first_reply_at));
+				thread.updates = obj.stats.updates;
+				
 				obj = null;
 				
 			} catch (error:Error){

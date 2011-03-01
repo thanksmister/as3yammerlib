@@ -15,10 +15,10 @@ package com.yammer.api.utils
         { 
         }
  		
-      	public static function timeAgoWords(from_time:Number, include_seconds:Boolean = false):String 
+      	public static function timeAgoWords(date:Date, include_seconds:Boolean = false):String 
       	{
       		var curdate:Date = new Date()
-      		return distanceTimeWords(from_time, curdate.time, include_seconds) + " ago";
+      		return distanceTimeWords(Number(date), curdate.time, include_seconds) + " ago";
 		}   
     
 	    public static function absoluteTimestamp(date:Date):String 
